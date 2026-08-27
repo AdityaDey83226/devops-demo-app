@@ -1,0 +1,15 @@
+# Cloud Foundry deployment manifest
+#
+# `cf push -f manifest.yml` reads this file to deploy the app to BTP CF.
+# random-route: true — BTP CF assigns a unique public URL automatically.
+# The Java buildpack detects the JAR and configures the JRE automatically.
+
+applications:
+  - name: devops-demo-app
+    path: app/target/devops-demo-app-1.0.0.jar
+    memory: 1G
+    random-route: true
+    buildpacks:
+      - java_buildpack_offline
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 17.+ } }'
