@@ -1,0 +1,21 @@
+# Kubernetes Service — devops-demo-app
+#
+# Exposes the pods to network traffic.
+# NodePort: accessible from outside the cluster on a static port.
+#
+# On minikube with the Docker driver (macOS), the cluster IP is not directly
+# routable from the host. Use kubectl port-forward to access the app:
+#   kubectl port-forward service/devops-demo-app 8081:80
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-demo-app
+spec:
+  selector:
+    app: devops-demo-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: NodePort
