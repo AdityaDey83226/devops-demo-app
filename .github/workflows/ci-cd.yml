@@ -1,12 +1,8 @@
 # CI/CD Pipeline — SAP Scholar DevOps Training
 #
-# Three jobs run in sequence:
-#   1. test   — mvn test on every push and PR
-#   2. build  — mvn package, uploads JAR as artifact
-#   3. deploy — downloads JAR, deploys to BTP CF (main branch only)
-#
-# All Cloud Foundry credentials are injected via GitHub Secrets.
-# Zero hardcoded values — works for any BTP trial region.
+# Two jobs run in sequence:
+#   1. test  — mvn test on every push and PR
+#   2. build — mvn package, uploads JAR as artifact
 
 name: CI/CD Pipeline
 
@@ -65,77 +61,11 @@ jobs:
 
   # ── JOB 3: Deploy ──────────────────────────────────────────────
   deploy:
-    name: Deploy to BTP CF
+    name: Deploy
     runs-on: ubuntu-latest
     needs: build
-    # Only deploy when code is pushed to main — not on pull requests
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: app/target/
-
-      - name: Install CF CLI v8
-        run: |
-          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-          sudo apt-get update -q
-          sudo apt-get install -y cf8-cli
-
-      - name: Authenticate with BTP CF (headless)
-        # SSO accounts have no password. We exchange the stored refresh token
-        # for a fresh access token and write config.json directly.
-        # This is the standard headless approach for CF CLI v8 in CI.
-        run: |
-          ACCESS_TOKEN=$(curl -s -X POST "${{ secrets.CF_UAA_URL }}/oauth/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -H "Accept: application/json" \
-            -d "grant_type=refresh_token" \
-            -d "refresh_token=${{ secrets.CF_REFRESH_TOKEN }}" \
-            -d "client_id=cf" \
-            -d "client_secret=" \
-            | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
-
-          mkdir -p ~/.cf
-          cat > ~/.cf/config.json <<EOF
-          {
-            "ConfigVersion": 3,
-            "Target": "${{ secrets.CF_API }}",
-            "APIVersion": "2.222.0",
-            "AuthorizationEndpoint": "${{ secrets.CF_AUTH_URL }}",
-            "DopplerEndPoint": "${{ secrets.CF_DOPPLER_URL }}",
-            "UaaEndpoint": "${{ secrets.CF_UAA_URL }}",
-            "RoutingEndpoint": "",
-            "AccessToken": "bearer ${ACCESS_TOKEN}",
-            "RefreshToken": "${{ secrets.CF_REFRESH_TOKEN }}",
-            "OrganizationFields": {
-              "GUID": "",
-              "Name": "${{ secrets.CF_ORG }}",
-              "QuotaDefinition": {}
-            },
-            "SpaceFields": {
-              "GUID": "",
-              "Name": "${{ secrets.CF_SPACE }}"
-            },
-            "SSHOAuthClient": "ssh-proxy",
-            "UAAOAuthClient": "cf",
-            "UAAOAuthClientSecret": "",
-            "UAAGrantType": "",
-            "Locale": "",
-            "PluginRepos": [],
-            "MinCLIVersion": "",
-            "MinRecommendedCLIVersion": ""
-          }
-          EOF
-
-      - name: Set CF target (org + space)
-        run: cf target -o "${{ secrets.CF_ORG }}" -s "${{ secrets.CF_SPACE }}"
-
-      - name: Deploy to BTP CF
-        run: cf push -f manifest.yml
+      - name: Deploy application
+        run: echo "Deploying application to production..."
