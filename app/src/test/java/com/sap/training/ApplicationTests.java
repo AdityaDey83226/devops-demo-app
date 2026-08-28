@@ -24,7 +24,7 @@ class ApplicationTests {
             "http://localhost:" + port + "/", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo("Hello from Nandini This is a devops demo");
+        assertThat(response.getBody()).isEqualTo("Hello from Circulam Team. This is a devops demo");
     }
 
     @Test

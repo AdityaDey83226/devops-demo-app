@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker — SAP DevOps Training</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .deck { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 80px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .slide.active { display: flex; opacity: 1; }
+
+    /* ── typography ── */
+    h1 { font-size: 3rem; font-weight: 700; line-height: 1.15; }
+    h2 { font-size: 2rem; font-weight: 700; margin-bottom: 32px; color: #58a6ff; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; }
+    p, li { font-size: 1.1rem; line-height: 1.75; color: #c9d1d9; }
+    ul { list-style: none; }
+    ul li::before { content: "▸ "; color: #58a6ff; }
+
+    /* ── accent colours ── */
+    .blue  { color: #58a6ff; }
+    .green { color: #3fb950; }
+    .orange { color: #f0883e; }
+    .purple { color: #bc8cff; }
+    .yellow { color: #d29922; }
+
+    /* ── layout helpers ── */
+    .cols { display: grid; gap: 40px; width: 100%; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+    .card.highlight { border-color: #58a6ff; }
+
+    /* ── code blocks ── */
+    pre {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      width: 100%;
+    }
+    code { font-family: inherit; }
+    .kw   { color: #ff7b72; }
+    .str  { color: #a5d6ff; }
+    .cmt  { color: #8b949e; font-style: italic; }
+    .cmd  { color: #3fb950; }
+    .flag { color: #f0883e; }
+
+    /* ── diagram boxes ── */
+    .diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 100%;
+      margin-top: 12px;
+    }
+    .dbox {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .dbox.blue-b  { border-color: #58a6ff; }
+    .dbox.green-b { border-color: #3fb950; }
+    .dbox.orange-b{ border-color: #f0883e; }
+    .arrow {
+      font-size: 1.6rem;
+      color: #8b949e;
+      margin: 0 10px;
+    }
+
+    /* ── badge ── */
+    .badge {
+      display: inline-block;
+      background: #1f3a5f;
+      color: #58a6ff;
+      border: 1px solid #58a6ff;
+      border-radius: 20px;
+      padding: 3px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── title slide ── */
+    .slide-title { background: radial-gradient(ellipse at 60% 40%, #0f2a4a 0%, #0d1117 70%); }
+    .slide-title h1 { font-size: 4rem; }
+    .slide-title .sub { font-size: 1.25rem; color: #8b949e; margin-top: 12px; }
+    .whale { font-size: 5rem; margin-bottom: 20px; }
+
+    /* ── table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 1rem; }
+    th { background: #21262d; padding: 12px 16px; text-align: left; color: #58a6ff; font-weight: 600; border-bottom: 1px solid #30363d; }
+    td { padding: 12px 16px; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── progress bar ── */
+    #progress {
+      position: fixed;
+      bottom: 0; left: 0;
+      height: 3px;
+      background: #58a6ff;
+      transition: width 0.3s ease;
+      z-index: 10;
+    }
+
+    /* ── nav ── */
+    #nav {
+      position: fixed;
+      bottom: 20px; right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+    }
+    #nav button {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    #nav button:hover { background: #30363d; }
+    #counter { color: #8b949e; font-size: 0.85rem; min-width: 60px; text-align: center; }
+
+    /* ── slide number label ── */
+    .slide-label {
+      position: fixed;
+      top: 20px; right: 24px;
+      color: #30363d;
+      font-size: 0.8rem;
+      z-index: 10;
+    }
+
+    .full-width { width: 100%; }
+    .center { text-align: center; }
+    .mt { margin-top: 20px; }
+    .mb { margin-bottom: 16px; }
+    .small { font-size: 0.88rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ── 1. Title ── -->
+  <div class="slide slide-title active">
+    <div class="whale">🐳</div>
+    <h1>Docker</h1>
+    <p class="sub">SAP DevOps Training · August 2026</p>
+    <p class="sub mt" style="color:#58a6ff;">Press → or click Next to begin</p>
+  </div>
+
+  <!-- ── 2. The Problem ── -->
+  <div class="slide">
+    <h2>The Problem Docker Solves</h2>
+    <div class="cols cols-2">
+      <div class="card" style="border-color:#f85149;">
+        <h3 style="color:#f85149;">😤 Without Docker</h3>
+        <ul style="margin-top:10px;">
+          <li>Code works on your MacBook</li>
+          <li>Colleague runs it — it crashes</li>
+          <li>Different Java version</li>
+          <li>Different OS, different libraries</li>
+          <li>"But it works on <em>my</em> machine!"</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:#3fb950;">
+        <h3 style="color:#3fb950;">✅ With Docker</h3>
+        <ul style="margin-top:10px;">
+          <li>Package your app + its environment</li>
+          <li>Same image runs everywhere</li>
+          <li>Developer laptop</li>
+          <li>CI/CD pipeline server</li>
+          <li>Cloud (BTP, AWS, Azure, GCP)</li>
+        </ul>
+      </div>
+    </div>
+    <p class="mt center small">Docker packages your app into a portable box — OS, runtime, dependencies included.</p>
+  </div>
+
+  <!-- ── 3. What is Docker ── -->
+  <div class="slide">
+    <h2>What is Docker?</h2>
+    <div class="cols cols-3">
+      <div class="card center">
+        <div style="font-size:2.5rem; margin-bottom:12px;">📄</div>
+        <h3 class="blue">Dockerfile</h3>
+        <p style="font-size:0.95rem; margin-top:8px;">A recipe — instructions to build your app's environment step by step</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2.5rem; margin-bottom:12px;">📦</div>
+        <h3 class="green">Image</h3>
+        <p style="font-size:0.95rem; margin-top:8px;">The built package — your app + OS + runtime, frozen and ready to ship</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2.5rem; margin-bottom:12px;">🏃</div>
+        <h3 class="orange">Container</h3>
+        <p style="font-size:0.95rem; margin-top:8px;">A running instance of an image — isolated, lightweight, disposable</p>
+      </div>
+    </div>
+    <div class="diagram mt">
+      <div class="dbox">You write<br/><span class="blue">Dockerfile</span></div>
+      <div class="arrow">→</div>
+      <div class="dbox blue-b"><span class="cmd">docker build</span><br/>creates an <span class="green">Image</span></div>
+      <div class="arrow">→</div>
+      <div class="dbox green-b"><span class="cmd">docker run</span><br/>starts a <span class="orange">Container</span></div>
+    </div>
+  </div>
+
+  <!-- ── 4. VM vs Container ── -->
+  <div class="slide">
+    <h2>VM vs Container</h2>
+    <table>
+      <thead>
+        <tr><th></th><th>Virtual Machine (VM)</th><th>Container</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>What it includes</td><td>Full OS + hypervisor + app</td><td>App + libraries only (shares host OS)</td></tr>
+        <tr><td>Size</td><td>Gigabytes</td><td>Megabytes</td></tr>
+        <tr><td>Startup time</td><td>Minutes</td><td>Seconds</td></tr>
+        <tr><td>Isolation</td><td>Complete (own OS kernel)</td><td>Process-level (shared kernel)</td></tr>
+        <tr><td>Use case</td><td>Run different operating systems</td><td>Package and ship apps</td></tr>
+      </tbody>
+    </table>
+    <p class="mt small center">Containers are like apartments in a building — separate living spaces, shared foundation.</p>
+  </div>
+
+  <!-- ── 5. Our Dockerfile — Stage 1 ── -->
+  <div class="slide">
+    <h2>Our Dockerfile — Stage 1: Build</h2>
+    <pre><code><span class="cmt"># Stage 1 — compile the app using Maven + JDK</span>
+<span class="kw">FROM</span> <span class="str">maven:3.9-eclipse-temurin-17</span> <span class="kw">AS</span> build
+<span class="cmt"># ↑ Start with a machine that already has Maven and JDK 17 installed</span>
+
+<span class="kw">WORKDIR</span> /app
+<span class="cmt"># ↑ Create /app folder and work inside it (like: mkdir /app && cd /app)</span>
+
+<span class="kw">COPY</span> pom.xml ./
+<span class="kw">RUN</span> mvn dependency:go-offline -q
+<span class="cmt"># ↑ Copy the dependency list first, download all libraries</span>
+<span class="cmt">#   Docker skips this step next time if pom.xml didn't change (caching)</span>
+
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn package -DskipTests -q
+<span class="cmt"># ↑ Copy source code, compile it → produces devops-demo-app-1.0.0.jar</span></code></pre>
+    <p class="mt small">At this point: the JAR file exists inside Stage 1. Stage 1 has Maven + JDK (~500 MB).</p>
+  </div>
+
+  <!-- ── 6. Our Dockerfile — Stage 2 ── -->
+  <div class="slide">
+    <h2>Our Dockerfile — Stage 2: Runtime</h2>
+    <pre><code><span class="cmt"># Stage 2 — fresh start, JRE only, no build tools</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jre</span>
+<span class="cmt"># ↑ New base image — just the JRE (runs Java, but can't compile it)</span>
+<span class="cmt">#   This is the image that will actually be deployed</span>
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="kw">COPY</span> <span class="flag">--from=build</span> /app/target/devops-demo-app-1.0.0.jar app.jar
+<span class="cmt"># ↑ From Stage 1, take ONLY the JAR. Everything else in Stage 1 is thrown away.</span>
+
+<span class="kw">EXPOSE</span> 8080
+<span class="cmt"># ↑ Documents that this app listens on port 8080</span>
+
+<span class="kw">ENTRYPOINT</span> ["java", "-jar", "app.jar"]
+<span class="cmt"># ↑ When the container starts, run: java -jar app.jar</span></code></pre>
+    <p class="mt small">Final image: JRE + JAR only (~180 MB). Maven and JDK are gone. Smaller = faster deploys.</p>
+  </div>
+
+  <!-- ── 7. Multi-stage diagram ── -->
+  <div class="slide">
+    <h2>Why Two Stages?</h2>
+    <div class="cols cols-2" style="align-items:start;">
+      <div class="card" style="border-color:#f85149;">
+        <div class="badge" style="background:#3a1a1a; color:#f85149; border-color:#f85149;">Stage 1 — Temporary</div>
+        <ul style="margin-top:16px;">
+          <li>Maven 3.9</li>
+          <li>JDK 17 (full compiler)</li>
+          <li>Source code</li>
+          <li>Downloaded libraries</li>
+        </ul>
+        <p style="margin-top:16px; font-size:0.95rem;">Size: <span style="color:#f85149;">~500 MB</span></p>
+        <p style="font-size:0.85rem; color:#8b949e; margin-top:6px;">Gets thrown away after build</p>
+      </div>
+      <div class="card" style="border-color:#3fb950;">
+        <div class="badge" style="background:#1a3a1a; color:#3fb950; border-color:#3fb950;">Stage 2 — Final Image ✓</div>
+        <ul style="margin-top:16px;">
+          <li>JRE 17 (run only)</li>
+          <li>devops-demo-app.jar</li>
+        </ul>
+        <p style="margin-top:16px; font-size:0.95rem;">Size: <span style="color:#3fb950;">~180 MB</span></p>
+        <p style="font-size:0.85rem; color:#8b949e; margin-top:6px;">This is what gets deployed</p>
+      </div>
+    </div>
+    <p class="mt small center">Analogy: you use a full workshop to build furniture, then deliver only the finished piece — not the entire workshop.</p>
+  </div>
+
+  <!-- ── 8. Commands ── -->
+  <div class="slide">
+    <h2>Running Docker — Step by Step</h2>
+    <div style="width:100%; display:flex; flex-direction:column; gap:16px;">
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+          <span class="badge">Step 1</span>
+          <h3 style="margin:0; color:#e6edf3;">Build the image</h3>
+        </div>
+        <pre style="margin:0;"><code><span class="cmd">docker build</span> <span class="flag">-t</span> devops-demo-app <span class="str">./app</span></code></pre>
+        <p class="small mt" style="margin-top:8px;">Runs the Dockerfile top to bottom. Creates an image named <code>devops-demo-app</code>. Takes ~2 min first time (downloading base images), instant after (cached).</p>
+      </div>
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+          <span class="badge">Step 2</span>
+          <h3 style="margin:0; color:#e6edf3;">Run a container from the image</h3>
+        </div>
+        <pre style="margin:0;"><code><span class="cmd">docker run</span> <span class="flag">-p</span> 8080:8080 <span class="flag">--name</span> demo-app devops-demo-app</code></pre>
+        <p class="small" style="margin-top:8px;"><span class="flag">-p 8080:8080</span> = your laptop's port 8080 → container's port 8080 &nbsp;|&nbsp; <span class="flag">--name</span> = give it a name</p>
+      </div>
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+          <span class="badge">Step 3</span>
+          <h3 style="margin:0; color:#e6edf3;">Test it</h3>
+        </div>
+        <pre style="margin:0;"><code><span class="cmd">curl</span> http://localhost:8080/
+<span class="cmt"># → Hello from SAP DevOps Training!</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 9. Useful Commands ── -->
+  <div class="slide">
+    <h2>Useful Docker Commands</h2>
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>docker build -t myapp .</code></td><td>Build an image named <code>myapp</code> from Dockerfile in current folder</td></tr>
+        <tr><td><code>docker run -p 8080:8080 myapp</code></td><td>Start a container, map port 8080</td></tr>
+        <tr><td><code>docker ps</code></td><td>List all <strong>running</strong> containers</td></tr>
+        <tr><td><code>docker images</code></td><td>List all images on your machine</td></tr>
+        <tr><td><code>docker stop demo-app</code></td><td>Stop a running container</td></tr>
+        <tr><td><code>docker rm demo-app</code></td><td>Delete the container (image stays)</td></tr>
+        <tr><td><code>docker logs demo-app</code></td><td>View logs from a container</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── 10. Docker Desktop ── -->
+  <div class="slide">
+    <h2>Docker Desktop — What to Look At</h2>
+    <div class="cols cols-3">
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:10px;">📦</div>
+        <h3 class="green">Images tab</h3>
+        <p style="font-size:0.9rem; margin-top:8px;">See <code>devops-demo-app</code> — name, size (~180 MB). This is your packaged app.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:10px;">🏃</div>
+        <h3 class="blue">Containers tab</h3>
+        <p style="font-size:0.9rem; margin-top:8px;">See <code>demo-app</code> running. Click the port link → opens the app in browser.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:10px;">📋</div>
+        <h3 class="orange">Logs tab</h3>
+        <p style="font-size:0.9rem; margin-top:8px;">Click a container → Logs. See Spring Boot startup. First place to check if something breaks.</p>
+      </div>
+    </div>
+    <div class="mt card" style="text-align:center; border-color:#3fb950;">
+      <p><span class="green">Key demo:</span> Stop the container → refresh browser → connection refused. Start it again → app is back.</p>
+      <p class="small mt">"No container = no app. That's what container orchestration (Kubernetes) solves."</p>
+    </div>
+  </div>
+
+  <!-- ── 11. Recap ── -->
+  <div class="slide">
+    <h2>Summary</h2>
+    <div class="cols cols-2">
+      <div>
+        <div class="card mb">
+          <h3 class="blue">📄 Dockerfile</h3>
+          <p style="font-size:0.95rem; margin-top:6px;">Recipe — instructions to build the environment</p>
+        </div>
+        <div class="card mb">
+          <h3 class="green">📦 Image</h3>
+          <p style="font-size:0.95rem; margin-top:6px;">Snapshot — packaged app, built by <code>docker build</code></p>
+        </div>
+        <div class="card">
+          <h3 class="orange">🏃 Container</h3>
+          <p style="font-size:0.95rem; margin-top:6px;">Running instance — started by <code>docker run</code></p>
+        </div>
+      </div>
+      <div class="card" style="justify-self:stretch; display:flex; flex-direction:column; gap:10px;">
+        <h3 class="yellow">Our Flow Today</h3>
+        <div class="diagram" style="flex-direction:column; gap:8px; align-items:flex-start; margin-top:8px;">
+          <div class="dbox blue-b" style="width:100%; text-align:left;">1. Write <span class="blue">HelloController.java</span></div>
+          <div class="arrow" style="margin:0; align-self:center;">↓</div>
+          <div class="dbox" style="width:100%; text-align:left;">2. <span class="cmd">docker build -t devops-demo-app ./app</span></div>
+          <div class="arrow" style="margin:0; align-self:center;">↓</div>
+          <div class="dbox" style="width:100%; text-align:left;">3. <span class="cmd">docker run -p 8080:8080 demo-app</span></div>
+          <div class="arrow" style="margin:0; align-self:center;">↓</div>
+          <div class="dbox green-b" style="width:100%; text-align:left;">4. <span class="green">curl http://localhost:8080/ ✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── progress + nav ── -->
+<div id="progress"></div>
+<div class="slide-label" id="slide-label"></div>
+<div id="nav">
+  <button onclick="go(-1)">← Prev</button>
+  <span id="counter"></span>
+  <button onclick="go(1)">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('slide-label').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${((current + 1) / slides.length) * 100}%`;
+  }
+
+  function go(dir) { show(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  show(0);
+</script>
+</body>
+</html>

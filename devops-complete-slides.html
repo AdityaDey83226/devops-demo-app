@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DevOps Complete — SAP Training</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf3;height:100vh;overflow:hidden}
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;padding:40px 80px;opacity:0;transition:opacity .3s}
+.slide.active{display:flex;opacity:1}
+h1{font-size:3rem;font-weight:800;line-height:1.1}
+h2{font-size:1.8rem;font-weight:700;margin-bottom:20px}
+h3{font-size:1.05rem;font-weight:600;margin-bottom:6px}
+p,li{font-size:.95rem;line-height:1.8;color:#c9d1d9}
+ul{list-style:none}
+ul li::before{content:"▸ "}
+code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:#21262d;padding:1px 6px;border-radius:4px}
+.blue{color:#58a6ff}.green{color:#3fb950}.orange{color:#f0883e}.red{color:#e74c3c}.purple{color:#bc8cff}.yellow{color:#d29922}.gray{color:#8b949e}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px 22px}
+.card.b1{border-color:#58a6ff}.card.b2{border-color:#3fb950}.card.b3{border-color:#f0883e}.card.br{border-color:#e74c3c}
+.cols{display:grid;gap:16px;width:100%}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+pre{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.7;overflow-x:auto;width:100%}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.cmt{color:#8b949e;font-style:italic}.cmd{color:#3fb950}.fn{color:#d2a8ff}.flag{color:#f0883e}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 12px;border-radius:20px;font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.bb{background:#0d1f38;color:#58a6ff;border:1px solid #58a6ff}
+.bg{background:#0d2818;color:#3fb950;border:1px solid #3fb950}
+.bo{background:#2d1e0a;color:#f0883e;border:1px solid #f0883e}
+.br2{background:#2d1010;color:#e74c3c;border:1px solid #e74c3c}
+.note{border-left:3px solid #58a6ff;background:#0d1f38;padding:10px 14px;border-radius:0 8px 8px 0;font-size:.88rem;color:#c9d1d9;width:100%}
+.note.g{border-color:#3fb950;background:#0d2818}.note.o{border-color:#f0883e;background:#2d1e0a}.note.r{border-color:#e74c3c;background:#1a0d0d}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:#21262d;padding:9px 13px;text-align:left;color:#e6edf3;font-weight:600;border-bottom:1px solid #30363d}
+td{padding:9px 13px;border-bottom:1px solid #21262d;color:#c9d1d9}
+tr:last-child td{border-bottom:none}
+.pipe{display:flex;align-items:center;gap:0;width:100%;margin-top:8px}
+.pbox{flex:1;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px 8px;text-align:center;font-size:.8rem}
+.parr{color:#8b949e;font-size:1.2rem;margin:0 3px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.snum{min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;background:#58a6ff;color:#0d1117}
+.snum.g{background:#3fb950}.snum.r{background:#e74c3c}
+.full{width:100%}.mt{margin-top:12px}.mb{margin-bottom:10px}.center{text-align:center}.small{font-size:.82rem;color:#8b949e}
+
+/* section title backgrounds */
+.s0{background:radial-gradient(ellipse at 50% 40%,#1a1030 0%,#0d1117 70%)}
+.s1bg{background:radial-gradient(ellipse at 55% 40%,#0d1f3a 0%,#0d1117 65%)}
+.s2bg{background:radial-gradient(ellipse at 55% 40%,#0d2818 0%,#0d1117 65%)}
+.s3bg{background:radial-gradient(ellipse at 55% 40%,#2d1e0a 0%,#0d1117 65%)}
+.dockerbg{background:radial-gradient(ellipse at 60% 40%,#0f2a4a 0%,#0d1117 70%)}
+.jenkinsbg{background:radial-gradient(ellipse at 60% 40%,#3a0a0a 0%,#0d1117 70%)}
+
+/* top section nav */
+#secnav{position:fixed;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+#secnav button{background:#161b22;border:1px solid #30363d;color:#8b949e;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:.75rem;transition:all .2s}
+#secnav button.active{color:#e6edf3;border-color:#58a6ff;background:#0d1f38}
+#secnav button.act-g{color:#e6edf3;border-color:#3fb950;background:#0d2818}
+#secnav button.act-o{color:#e6edf3;border-color:#f0883e;background:#2d1e0a}
+#secnav button.act-d{color:#e6edf3;border-color:#58a6ff;background:#0f2a4a}
+#secnav button.act-j{color:#e6edf3;border-color:#e74c3c;background:#2d1010}
+
+/* progress + nav */
+#progress{position:fixed;bottom:0;left:0;height:3px;background:#58a6ff;transition:width .3s,background .3s;z-index:10}
+#nav{position:fixed;bottom:16px;right:20px;display:flex;align-items:center;gap:8px;z-index:10}
+#nav button{background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:background .2s}
+#nav button:hover{background:#30363d}
+#counter{color:#8b949e;font-size:.8rem;min-width:52px;text-align:center}
+.timing{display:inline-flex;align-items:center;gap:4px;background:#21262d;border:1px solid #30363d;border-radius:20px;padding:3px 12px;font-size:.75rem;color:#8b949e;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ═══════════════ DEVOPS INTRO ═══════════════ -->
+
+<!-- 1. TITLE -->
+<div class="slide s0">
+  <div style="font-size:3.5rem;margin-bottom:14px">🚀</div>
+  <h1>DevOps Training</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:8px">SAP Scholar Program · August 28, 2026</p>
+  <p style="font-size:.95rem;color:#bc8cff;margin-top:6px">Trainer: Abhinav Yadav</p>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center">
+    <span class="badge bb">DevOps 30 min</span>
+    <span class="badge bg">Git 20 min</span>
+    <span class="badge bo">CI/CD 25 min</span>
+    <span class="badge" style="background:#0f2a4a;color:#58a6ff;border:1px solid #58a6ff">Docker</span>
+    <span class="badge br2">Jenkins</span>
+  </div>
+  <p style="margin-top:20px;font-size:.9rem;color:#8b949e">Press → to begin &nbsp;|&nbsp; Use top buttons to jump to sections</p>
+</div>
+
+<!-- 2. AGENDA -->
+<div class="slide">
+  <h2 class="blue">Today's Plan</h2>
+  <div class="cols c3">
+    <div class="card b1" style="padding:20px">
+      <div style="font-size:1.8rem;margin-bottom:8px">🔄</div>
+      <span class="badge bb mb" style="display:inline-block">30 min</span>
+      <h3 class="blue" style="margin-top:6px">What is DevOps</h3>
+      <ul style="margin-top:8px;font-size:.85rem"><li>Dev vs Ops problem</li><li>DevOps culture</li><li>Infinity Loop — 8 stages</li><li>Tools per stage</li></ul>
+    </div>
+    <div class="card b2" style="padding:20px">
+      <div style="font-size:1.8rem;margin-bottom:8px">🌿</div>
+      <span class="badge bg mb" style="display:inline-block">20 min</span>
+      <h3 class="green" style="margin-top:6px">Git's Role</h3>
+      <ul style="margin-top:8px;font-size:.85rem"><li>Git as source of truth</li><li>PR triggers pipeline</li><li>Feature branch workflow</li><li>GitOps concept</li></ul>
+    </div>
+    <div class="card b3" style="padding:20px">
+      <div style="font-size:1.8rem;margin-bottom:8px">⚙️</div>
+      <span class="badge bo mb" style="display:inline-block">25 min</span>
+      <h3 class="orange" style="margin-top:6px">CI/CD Pipeline</h3>
+      <ul style="margin-top:8px;font-size:.85rem"><li>CI vs CD</li><li>Pipeline anatomy</li><li>Artifacts</li><li>Our real pipeline</li></ul>
+    </div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="card" style="padding:16px;border-color:#58a6ff">
+      <div style="font-size:1.5rem;margin-bottom:6px">🐳</div>
+      <h3 class="blue">Docker</h3>
+      <p style="font-size:.85rem;margin-top:4px">Dockerfile → Image → Container. Multi-stage builds. Commands hands-on.</p>
+    </div>
+    <div class="card" style="padding:16px;border-color:#e74c3c">
+      <div style="font-size:1.5rem;margin-bottom:6px">🔧</div>
+      <h3 class="red">Jenkins CI/CD</h3>
+      <p style="font-size:.85rem;margin-top:4px">Jenkinsfile, jobs, SCM polling, green/red builds. Hands-on lab.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 3. SESSION 1 HEADER -->
+<div class="slide s1bg">
+  <div class="badge bb mb" style="display:inline-block;font-size:.9rem;padding:5px 18px">Session 1 · 30 minutes</div>
+  <h1 style="font-size:3.2rem;margin-top:14px" class="blue">What is DevOps?</h1>
+  <p style="font-size:1.05rem;color:#8b949e;margin-top:10px">The problem, the solution, and the infinity loop</p>
+</div>
+
+<!-- 4. THE PROBLEM -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 — What is DevOps?</div>
+  <h2 class="blue">The Problem — Dev vs Ops Silos</h2>
+  <div class="cols c2">
+    <div class="card br">
+      <h3 class="red">😤 Development Team</h3>
+      <ul style="margin-top:8px"><li>Goal: ship new features fast</li><li>Works on their own laptop</li><li>Says: "Works on my machine!"</li><li>Throws code over the wall to Ops</li><li>Moves on to next feature</li></ul>
+    </div>
+    <div class="card br">
+      <h3 class="red">😤 Operations Team</h3>
+      <ul style="margin-top:8px"><li>Goal: keep production stable</li><li>Receives code without warning</li><li>Different environment from Dev</li><li>Says: "It breaks our servers!"</li><li>Deployment takes days</li></ul>
+    </div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="card"><h3 class="yellow">Without DevOps</h3><ul style="margin-top:6px;font-size:.88rem"><li>Release once a month or less</li><li>Deployment takes 2–3 days manually</li><li>Bugs reach production often</li><li>Teams blame each other</li></ul></div>
+    <div class="note r mt" style="margin-top:0"><strong>"Integration Hell"</strong> — teams build in isolation for weeks. When they combine: conflicts everywhere. Nobody knows whose code broke what. Untangling takes days.</div>
+  </div>
+</div>
+
+<!-- 5. WHAT IS DEVOPS -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 — What is DevOps?</div>
+  <h2 class="blue">What is DevOps?</h2>
+  <div class="card b1 mb full" style="padding:20px">
+    <p style="font-size:1rem;line-height:1.9">DevOps is a <strong class="blue">culture, mindset, and set of practices</strong> that brings Development and Operations together — automating the software delivery process so teams can build, test, and release software <strong class="blue">faster and more reliably</strong>.</p>
+  </div>
+  <div class="cols c3">
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">🤝</div><h3 class="blue">Collaboration</h3><p style="font-size:.88rem;margin-top:6px">Dev and Ops share ownership — same team, same goals, same on-call.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">🤖</div><h3 class="blue">Automation</h3><p style="font-size:.88rem;margin-top:6px">Every manual step from code to production is automated.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">🔁</div><h3 class="blue">Fast Feedback</h3><p style="font-size:.88rem;margin-top:6px">Know within minutes if something broke — not days later.</p></div>
+  </div>
+  <div class="note mt"><strong>Remember:</strong> DevOps is NOT a job title. It's an organisation-wide philosophy. Dev + Ops + Security + QA — everyone participates.</div>
+</div>
+
+<!-- 6. INFINITY LOOP — SVG -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 — The Infinity Loop</div>
+  <h2 class="blue">The DevOps Infinity Loop ∞</h2>
+  <p style="font-size:.9rem;color:#8b949e;margin-bottom:10px">Shaped like ∞ because it never stops — every Monitor finding loops back to Plan</p>
+
+  <svg viewBox="0 0 900 330" style="width:100%;max-height:220px" xmlns="http://www.w3.org/2000/svg">
+    <!-- RIGHT LOOP drawn first (behind left loop at top crossing) -->
+    <!-- RELEASE (green) -->
+    <path d="M 450,219 C 472,288 562,312 650,295" fill="none" stroke="#22c55e" stroke-width="46" stroke-linecap="round"/>
+    <!-- DEPLOY (orange) -->
+    <path d="M 650,295 C 800,312 884,240 870,165" fill="none" stroke="#f97316" stroke-width="46" stroke-linecap="round"/>
+    <!-- OPERATE (red) -->
+    <path d="M 870,165 C 884,90 800,18 650,35" fill="none" stroke="#ef4444" stroke-width="46" stroke-linecap="round"/>
+    <!-- MONITOR (blue) -->
+    <path d="M 650,35 C 562,18 472,42 450,111" fill="none" stroke="#3b82f6" stroke-width="46" stroke-linecap="round"/>
+
+    <!-- LEFT LOOP drawn on top (covers right loop at top crossing) -->
+    <!-- PLAN (green) -->
+    <path d="M 450,111 C 428,42 338,18 250,35" fill="none" stroke="#22c55e" stroke-width="46" stroke-linecap="round"/>
+    <!-- CODE (blue) -->
+    <path d="M 250,35 C 100,18 16,90 30,165" fill="none" stroke="#3b82f6" stroke-width="46" stroke-linecap="round"/>
+    <!-- BUILD (green) -->
+    <path d="M 30,165 C 16,240 100,312 250,295" fill="none" stroke="#22c55e" stroke-width="46" stroke-linecap="round"/>
+    <!-- TEST (orange) -->
+    <path d="M 250,295 C 338,312 428,288 450,219" fill="none" stroke="#f97316" stroke-width="46" stroke-linecap="round"/>
+
+    <!-- Inner hollow ellipses (dark fill = background colour) -->
+    <ellipse cx="250" cy="165" rx="156" ry="92" fill="#0d1117"/>
+    <ellipse cx="650" cy="165" rx="156" ry="92" fill="#0d1117"/>
+
+    <!-- Centre crossing diamond -->
+    <polygon points="450,111 494,165 450,219 406,165" fill="#0d1117"/>
+
+    <!-- PLAN / RELEASE labels inside the crossing diamond -->
+    <text x="450" y="147" fill="#22c55e" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">PLAN</text>
+    <text x="450" y="198" fill="#22c55e" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">RELEASE</text>
+
+    <!-- Stage name labels on bands (white, bold) -->
+    <text x="346" y="43"  fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">PLAN</text>
+    <text x="94"  y="105" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">CODE</text>
+    <text x="94"  y="230" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">BUILD</text>
+    <text x="346" y="292" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">TEST</text>
+    <text x="554" y="292" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">RELEASE</text>
+    <text x="806" y="230" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">DEPLOY</text>
+    <text x="806" y="105" fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">OPERATE</text>
+    <text x="554" y="43"  fill="white" font-size="10" font-family="Segoe UI,sans-serif" font-weight="700" text-anchor="middle">MONITOR</text>
+
+    <!-- Tool labels outside loops (small, gray) -->
+    <text x="250" y="8"   fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="middle">Confluence · JIRA</text>
+    <text x="250" y="323" fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="middle">Maven · sbt · Gradle</text>
+    <text x="450" y="323" fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="middle">Selenium · JUnit · Jenkins</text>
+    <text x="650" y="8"   fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="middle">Nagios · Splunk · Datadog</text>
+    <text x="895" y="105" fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="end">DC/OS · Docker · AWS</text>
+    <text x="895" y="230" fill="#8b949e" font-size="8" font-family="Segoe UI,sans-serif" text-anchor="end">Kubernetes · Chef · Ansible</text>
+  </svg>
+
+  <div class="cols c2 mt">
+    <div class="card b1"><h3 class="blue">Left side — Dev 💙</h3><p style="font-size:.88rem;margin-top:4px">Plan → Code → Build → Test. Developer activities. Every step feeds the next automatically.</p></div>
+    <div class="card b2"><h3 class="green">Right side — Ops 💚</h3><p style="font-size:.88rem;margin-top:4px">Release → Deploy → Operate → Monitor. Monitor feeds back to Plan — loop never ends.</p></div>
+  </div>
+</div>
+
+<!-- 7. STAGES 1+2 -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 — Infinity Loop Stages</div>
+  <h2 class="blue">📋 Plan &nbsp;·&nbsp; 💻 Code</h2>
+  <div class="cols c2">
+    <div class="card b1"><h3 class="blue">📋 Stage 1 — Plan</h3>
+      <ul style="margin-top:8px;font-size:.9rem"><li>Define what to build next (user stories)</li><li>Break work into 2-week sprints</li><li>Assign to developers in Jira</li><li>Bugs from Monitor become new Plan items</li></ul>
+      <p style="margin-top:10px;font-size:.83rem;color:#8b949e">Tools: <strong>Jira, Confluence, GitHub Issues</strong></p>
+    </div>
+    <div class="card b1"><h3 class="blue">💻 Stage 2 — Code</h3>
+      <ul style="margin-top:8px;font-size:.9rem"><li>Write on isolated feature branch</li><li>Code reviewed via Pull Request</li><li>Every change tracked in Git</li><li>Push → CI pipeline fires automatically</li></ul>
+      <p style="margin-top:10px;font-size:.83rem;color:#8b949e">Tools: <strong>VS Code, IntelliJ, Git, GitHub</strong></p>
+    </div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="card b2"><h3 class="green">🔨 Stage 3 — Build</h3>
+      <ul style="margin-top:8px;font-size:.9rem"><li>Compile source code</li><li>Resolve all dependencies</li><li>Package → JAR / Docker image</li></ul>
+      <p style="margin-top:8px;font-size:.83rem;color:#8b949e">Our command: <code>mvn package</code></p>
+    </div>
+    <div class="card b2"><h3 class="green">🧪 Stage 4 — Test</h3>
+      <ul style="margin-top:8px;font-size:.9rem"><li>Unit tests — test individual functions</li><li>Integration tests — test modules together</li><li>Fail = pipeline stops here</li></ul>
+      <p style="margin-top:8px;font-size:.83rem;color:#8b949e">Our command: <code>mvn test</code></p>
+    </div>
+  </div>
+</div>
+
+<!-- 8. STAGES 5–8 -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 — Infinity Loop Stages</div>
+  <h2 class="blue">📦 Release · 🚀 Deploy · ⚙️ Operate · 📊 Monitor</h2>
+  <div class="cols c4">
+    <div class="card"><h3 class="orange">📦 Release</h3><ul style="margin-top:6px;font-size:.85rem"><li>Version the artifact (v1.2.3)</li><li>Store in artifact repo</li><li>Tag the git commit</li></ul><p class="small" style="margin-top:6px">Tools: Nexus, GitHub Releases</p></div>
+    <div class="card b2"><h3 class="green">🚀 Deploy</h3><ul style="margin-top:6px;font-size:.85rem"><li>Push to environment automatically</li><li>Dev → QA → Production gates</li><li>Health check after deploy</li></ul><p class="small" style="margin-top:6px">Our: <code>cf push</code></p></div>
+    <div class="card b2"><h3 class="green">⚙️ Operate</h3><ul style="margin-top:6px;font-size:.85rem"><li>Auto-scaling on traffic spikes</li><li>Self-healing crashed containers</li><li>Zero-downtime rolling updates</li></ul><p class="small" style="margin-top:6px">Tools: Kubernetes, BTP CF</p></div>
+    <div class="card b1"><h3 class="blue">📊 Monitor</h3><ul style="margin-top:6px;font-size:.85rem"><li>Metrics: CPU, memory, error rate</li><li>Logs: what happened + when</li><li>Alerts: notify on-call team</li></ul><p class="small" style="margin-top:6px">Tools: Prometheus, Grafana</p></div>
+  </div>
+  <div class="note mt"><strong>The loop closes:</strong> Monitor finds a bug → Jira ticket → next sprint Plan → developer fixes → pipeline deploys → Monitor confirms resolved. The ∞ continues.</div>
+  <table class="mt">
+    <thead><tr><th>Stage</th><th>Today we use</th><th>Command</th></tr></thead>
+    <tbody>
+      <tr><td>🔨 Build</td><td>Maven</td><td><code>mvn package</code></td></tr>
+      <tr><td>🧪 Test</td><td>JUnit</td><td><code>mvn test</code></td></tr>
+      <tr><td>🚀 Deploy</td><td>GitHub Actions + BTP CF</td><td><code>cf push -f manifest.yml</code></td></tr>
+      <tr><td>📊 Monitor</td><td>CF logs</td><td><code>cf logs &lt;app&gt;</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 9. SESSION 2 HEADER -->
+<div class="slide s2bg">
+  <div class="badge bg mb" style="display:inline-block;font-size:.9rem;padding:5px 18px">Session 2 · 20 minutes</div>
+  <h1 style="font-size:3.2rem;margin-top:14px" class="green">Git's Role in DevOps</h1>
+  <p style="font-size:1.05rem;color:#8b949e;margin-top:10px">Why Git is the foundation of everything</p>
+</div>
+
+<!-- 10. GIT AS FOUNDATION -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 — Git's Role</div>
+  <h2 class="green">Git is the Starting Gun</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card b2 mb"><h3 class="green">Single Source of Truth</h3>
+        <ul style="margin-top:8px;font-size:.9rem"><li>Application code</li><li>Pipeline definitions (ci-cd.yml)</li><li>Infrastructure (manifest.yml, k8s/)</li><li>Documentation</li></ul>
+        <p style="font-size:.85rem;color:#8b949e;margin-top:8px">"If it's not in Git, it doesn't exist."</p>
+      </div>
+      <div class="card b2"><h3 class="green">Without Git</h3>
+        <ul style="margin-top:8px;font-size:.9rem"><li>No history — who changed what, when?</li><li>No collaboration — overwriting each other</li><li>No automation — nothing to trigger on</li><li>No rollback — can't go back</li></ul>
+      </div>
+    </div>
+    <div>
+      <div class="card mb"><h3 class="yellow">Every DevOps automation begins with a Git event</h3>
+        <p style="font-size:.9rem;margin-top:8px">The pipeline doesn't fire because someone clicks a button. It fires because someone <code>git push</code>ed. Git is the trigger for everything.</p>
+      </div>
+      <pre><code><span class="cmd">git push</span> origin main
+  ↓
+GitHub detects push event
+  ↓
+GitHub Actions fires ci-cd.yml
+  ↓
+test → build → deploy
+  ↓
+App live on BTP CF ✓</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- 11. PR TRIGGERS PIPELINE -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 — Git's Role</div>
+  <h2 class="green">How a PR Triggers the Pipeline</h2>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+    <div class="step"><div class="snum g">1</div><div class="card full" style="padding:10px 14px"><strong class="green">Create feature branch</strong><pre style="margin-top:6px"><code><span class="cmd">git checkout -b</span> feature/new-greeting
+<span class="cmt"># work here, never on main directly</span></code></pre></div></div>
+    <div class="step"><div class="snum g">2</div><div class="card full" style="padding:10px 14px"><strong class="green">Push and open Pull Request</strong><pre style="margin-top:6px"><code><span class="cmd">git push</span> origin feature/new-greeting
+<span class="cmt"># GitHub → New Pull Request → request review</span></code></pre></div></div>
+    <div class="step"><div class="snum g">3</div><div class="card full" style="padding:10px 14px"><strong class="green">GitHub Actions fires automatically on PR</strong><p style="font-size:.88rem;margin-top:4px;color:#c9d1d9">Runs test + build jobs → posts ✅ or ❌ as a status check on the PR. Reviewer sees result before approving.</p></div></div>
+    <div class="step"><div class="snum g">4</div><div class="card full" style="padding:10px 14px"><strong class="green">Merge to main → full pipeline with deploy</strong><p style="font-size:.88rem;margin-top:4px;color:#c9d1d9">Only on merge to main does the deploy job run. App goes live on BTP CF. Zero manual steps.</p></div></div>
+  </div>
+</div>
+
+<!-- 12. FEATURE BRANCH WORKFLOW -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 — Git's Role</div>
+  <h2 class="green">Feature Branch Workflow</h2>
+  <div class="card b2 mb full">
+    <pre style="background:transparent;border:none;padding:0"><code><span class="cmt">main:    ──●──────────────────────────────────●── always deployable</span>
+             \                                /
+<span class="cmt">feature:  ●──●──● (dev works here)    PR opened → CI ✅ → reviewed → merge</span></code></pre>
+  </div>
+  <div class="cols c3">
+    <div class="card"><h3 class="green">Main branch</h3><ul style="margin-top:6px;font-size:.88rem"><li>Always deployable</li><li>Protected — no direct push</li><li>Only accepts PRs that pass CI</li></ul></div>
+    <div class="card"><h3 class="green">Feature branch</h3><ul style="margin-top:6px;font-size:.88rem"><li>One branch per feature/bugfix</li><li>Short-lived — merge quickly</li><li>Isolated from other work</li></ul></div>
+    <div class="card"><h3 class="green">Pull Request</h3><ul style="margin-top:6px;font-size:.88rem"><li>Code review gate</li><li>CI must pass to merge</li><li>Approval required before merge</li></ul></div>
+  </div>
+  <div class="note g mt"><strong>Rule:</strong> Nobody pushes directly to main. Every change goes through a PR. CI runs. Someone reviews. Then it merges. This is what keeps main always deployable and production always stable.</div>
+</div>
+
+<!-- 13. SAP GITHUB + GITOOPS -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 — Git's Role</div>
+  <h2 class="green">GitOps &amp; SAP GitHub Enterprise</h2>
+  <div class="cols c2">
+    <div class="card b2 mb"><h3 class="green">GitOps</h3>
+      <p style="font-size:.9rem;margin-top:8px">GitOps = Git is the source of truth for <strong>infrastructure state</strong> too. Want 5 replicas instead of 3? Change <code>k8s/deployment.yaml</code> in Git and push. The cluster syncs automatically.</p>
+      <p style="font-size:.88rem;color:#8b949e;margin-top:8px">Tools: ArgoCD, Flux</p>
+    </div>
+    <div class="card b2"><h3 class="green">github.tools.sap</h3>
+      <p style="font-size:.9rem;margin-top:8px">SAP's private GitHub Enterprise — same Git, same PRs, but behind SAP SSO. All internal code lives here.</p>
+      <table style="margin-top:10px;font-size:.82rem">
+        <thead><tr><th>Feature</th><th>github.tools.sap</th><th>github.com</th></tr></thead>
+        <tbody>
+          <tr><td>Auth</td><td>SAP SSO</td><td>GitHub account</td></tr>
+          <tr><td>GH Actions</td><td>❌ Disabled</td><td>✅ Available</td></tr>
+          <tr><td>Used for</td><td>SAP code (daily work)</td><td>Training today</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="note g mt"><strong>Why today's pipeline is on github.com:</strong> GitHub Actions is disabled on github.tools.sap at enterprise level. For real SAP projects → use Jenkins or SAP CI/CD Service instead.</div>
+</div>
+
+<!-- 14. SESSION 3 HEADER -->
+<div class="slide s3bg">
+  <div class="badge bo mb" style="display:inline-block;font-size:.9rem;padding:5px 18px">Session 3 · 25 minutes</div>
+  <h1 style="font-size:3rem;margin-top:14px" class="orange">CI/CD + Pipeline Anatomy</h1>
+  <p style="font-size:1.05rem;color:#8b949e;margin-top:10px">How code gets from your laptop to live production</p>
+</div>
+
+<!-- 15. WHAT IS CI -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 — CI/CD</div>
+  <h2 class="orange">Continuous Integration (CI)</h2>
+  <div class="card b3 mb full" style="padding:18px"><p style="font-size:.98rem;line-height:1.9"><strong>CI</strong> = automatically <strong class="orange">build and test</strong> every code change the moment it's pushed — multiple times per day, every day, zero human involvement.</p></div>
+  <div class="cols c3">
+    <div class="card"><h3 class="orange">Problem CI Solves</h3><ul style="margin-top:6px;font-size:.88rem"><li>5 devs work in isolation 2 weeks</li><li>All merge at once — "integration hell"</li><li>Conflicts everywhere</li><li>3 days to untangle</li></ul></div>
+    <div class="card b3"><h3 class="orange">What CI Does</h3><ul style="margin-top:6px;font-size:.88rem"><li>Merge small, merge often</li><li>Every push → build + test</li><li>Bug caught in minutes not days</li><li>Cost to fix here: 5 min</li><li>Cost to fix in prod: hours + angry users</li></ul></div>
+    <div class="card"><h3 class="orange">3 Rules of CI</h3><ul style="margin-top:6px;font-size:.88rem"><li>Every commit triggers the pipeline</li><li>Fix broken builds <em>immediately</em></li><li>Software works ALL the time</li></ul></div>
+  </div>
+</div>
+
+<!-- 16. CI vs CD -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 — CI/CD</div>
+  <h2 class="orange">Continuous Delivery vs Deployment</h2>
+  <div class="cols c2">
+    <div class="card b3"><h3 class="orange">Continuous Delivery</h3><p style="font-size:.9rem;margin-top:8px">Always <strong>ready to deploy</strong> — human decides when to ship.</p><ul style="margin-top:8px;font-size:.88rem"><li>Pipeline builds + tests + stages</li><li>Waits for human approval</li><li>Human clicks "Deploy to Production"</li></ul><p style="margin-top:8px;font-size:.83rem;color:#8b949e">Used in: banking, healthcare, regulated</p></div>
+    <div class="card b2"><h3 class="green">Continuous Deployment</h3><p style="font-size:.9rem;margin-top:8px"><strong>Automatically deployed</strong> to production when CI passes.</p><ul style="margin-top:8px;font-size:.88rem"><li>No approval needed</li><li>Merge to main = live in prod</li><li>Deploy 100x per day</li></ul><p style="margin-top:8px;font-size:.83rem;color:#8b949e">Used in: Netflix, Spotify, SaaS</p></div>
+  </div>
+  <table class="mt">
+    <thead><tr><th>Term</th><th>Human approval?</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong class="orange">Continuous Integration</strong></td><td>No — fully automatic</td><td>Every push runs tests</td></tr>
+      <tr><td><strong class="orange">Continuous Delivery</strong></td><td>Yes — human clicks deploy</td><td>Bank releases every Friday</td></tr>
+      <tr><td><strong class="green">Continuous Deployment</strong></td><td>No — fully automatic</td><td>Netflix deploys 100x/day</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 17. PIPELINE ANATOMY -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 — Pipeline Anatomy</div>
+  <h2 class="orange">Anatomy of a CI/CD Pipeline</h2>
+  <p style="margin-bottom:12px;font-size:.9rem;color:#8b949e">A pipeline = sequence of stages. Each is a gate — fail one, stop everything.</p>
+  <div class="pipe mb">
+    <div class="pbox" style="border-color:#bc8cff"><strong class="purple">Trigger</strong><br/><span class="small">git push</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#3fb950"><strong class="green">Test</strong><br/><span class="small">mvn test</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#58a6ff"><strong class="blue">Build</strong><br/><span class="small">mvn package</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#f0883e"><strong class="orange">Artifact</strong><br/><span class="small">.jar stored</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#3fb950"><strong class="green">Deploy</strong><br/><span class="small">cf push</span></div>
+  </div>
+  <div class="cols c3">
+    <div class="card"><h3 class="purple">Trigger</h3><p style="font-size:.88rem;margin-top:6px">A push, PR, or scheduled time starts the pipeline. Our YAML: <code>on: [push, pull_request]</code></p></div>
+    <div class="card b2"><h3 class="green">Test → Build (CI)</h3><p style="font-size:.88rem;margin-top:6px">Test first — if tests fail, skip build. CI stages run on every push. <code>needs:</code> creates the dependency chain.</p></div>
+    <div class="card b3"><h3 class="orange">Artifact → Deploy (CD)</h3><p style="font-size:.88rem;margin-top:6px">Artifact is stored, then deployed. CD stages only run on merge to main. Build once, deploy everywhere.</p></div>
+  </div>
+  <div class="note o mt"><strong>Artifact:</strong> The built output — our <code>devops-demo-app-1.0.0.jar</code>. Build once, store it, deploy to dev → QA → prod. Never rebuild for each environment.</div>
+</div>
+
+<!-- 18. OUR PIPELINE -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 — Our Pipeline</div>
+  <h2 class="orange">Our Actual Pipeline — .github/workflows/ci-cd.yml</h2>
+  <div class="cols c2">
+    <pre style="font-size:.78rem"><code><span class="cmt"># Trigger — what fires the pipeline</span>
+<span class="kw">on</span>:
+  <span class="kw">push</span>:
+    branches: [main]
+  <span class="kw">pull_request</span>:
+    branches: [main]
+
+<span class="kw">jobs</span>:
+  <span class="fn">test</span>:               <span class="cmt"># Job 1</span>
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+      - run: <span class="cmd">mvn test</span> -f app/pom.xml
+
+  <span class="fn">build</span>:              <span class="cmt"># Job 2</span>
+    needs: test         <span class="cmt"># waits for test ✓</span>
+    steps:
+      - run: <span class="cmd">mvn package</span> -DskipTests
+      - uses: actions/upload-artifact@v3
+
+  <span class="fn">deploy</span>:             <span class="cmt"># Job 3</span>
+    needs: build        <span class="cmt"># waits for build ✓</span>
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - run: <span class="cmd">cf push</span> -f manifest.yml</code></pre>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card"><h3 class="green">Job 1: test</h3><ul style="margin-top:6px;font-size:.85rem"><li>Runs on every push + PR</li><li>Fresh Ubuntu machine</li><li><code>mvn test</code> → JUnit runs</li><li>Fail = everything stops</li></ul></div>
+      <div class="card"><h3 class="blue">Job 2: build</h3><ul style="margin-top:6px;font-size:.85rem"><li><code>needs: test</code> — waits for test</li><li><code>mvn package</code> → creates JAR</li><li>Uploads JAR as GitHub artifact</li></ul></div>
+      <div class="card"><h3 class="orange">Job 3: deploy</h3><ul style="margin-top:6px;font-size:.85rem"><li><code>needs: build</code></li><li>Only on push to main branch</li><li>Downloads JAR from build job</li><li><code>cf push -f manifest.yml</code></li></ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- 19. SUMMARY SLIDE -->
+<div class="slide">
+  <h2 style="color:#bc8cff">The Full Story</h2>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+    <div class="step"><div class="snum">1</div><div class="card full" style="padding:10px 14px"><strong class="blue">DevOps</strong> = culture of collaboration + automation. Dev + Ops as one team. The ∞ loop: Plan→Code→Build→Test→Release→Deploy→Operate→Monitor.</div></div>
+    <div class="step"><div class="snum g">2</div><div class="card full" style="padding:10px 14px"><strong class="green">Git</strong> = foundation of everything. Every pipeline starts with a push. PRs trigger CI. Feature branches keep main stable.</div></div>
+    <div class="step"><div class="snum" style="background:#f0883e">3</div><div class="card full" style="padding:10px 14px"><strong class="orange">CI/CD</strong> = automated conveyor belt. Trigger → Test → Build → Artifact → Deploy. Catch bugs in minutes, not days.</div></div>
+    <div class="step"><div class="snum" style="background:#58a6ff">4</div><div class="card full" style="padding:10px 14px"><strong class="blue">Docker</strong> = package app + environment into a portable container image. Same image runs everywhere.</div></div>
+    <div class="step"><div class="snum r">5</div><div class="card full" style="padding:10px 14px"><strong class="red">Jenkins</strong> = automation server that runs your pipeline. Jenkinsfile = pipeline as code in your repo.</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ JENKINS ═══════════════ -->
+
+<!-- 30. JENKINS TITLE -->
+<div class="slide jenkinsbg">
+  <div style="font-size:4rem;margin-bottom:14px">🔧</div>
+  <h1>Jenkins CI/CD</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:10px">From zero to automated pipelines — hands-on guide</p>
+  <p style="font-size:.95rem;color:#e74c3c;margin-top:6px">SAP DevOps Training · August 2026</p>
+</div>
+
+<!-- 31. JENKINS — PROBLEM -->
+<div class="slide">
+  <h2 class="red">The Problem Without CI/CD</h2>
+  <div class="card br mb full"><p>Imagine 5 developers working on the same codebase. Each writes code for a week, then they try to merge. Conflicts everywhere. Tests fail. Nobody knows whose code broke what. This is called <strong class="red">integration hell.</strong></p></div>
+  <div class="cols c2">
+    <div class="card"><h3 class="red">😤 Without CI/CD</h3><ul style="margin-top:8px"><li>Someone manually runs tests</li><li>Takes hours — or gets forgotten</li><li>Bug found days later</li><li>Already reached production</li></ul></div>
+    <div class="card b2"><h3 class="green">✅ With CI/CD</h3><ul style="margin-top:8px"><li>Every push triggers tests automatically</li><li>Bug found in minutes</li><li>Never reaches production</li><li>Developer notified immediately</li></ul></div>
+  </div>
+</div>
+
+<!-- 32. WHAT IS JENKINS -->
+<div class="slide">
+  <h2 class="red">What is Jenkins?</h2>
+  <div class="card br mb full"><p>Jenkins is an open-source automation server. It watches your Git repository and automatically runs your pipeline whenever code changes are pushed.</p><p style="margin-top:8px">Think of Jenkins as a <strong class="red">robot developer that never sleeps</strong> — it pulls your code, runs your tests, and tells you immediately if something broke.</p></div>
+  <div class="cols c2">
+    <div class="card"><h3 class="red">😤 Without Jenkins</h3><ul style="margin-top:8px"><li>Developer pushes code</li><li>Someone manually runs tests</li><li>Takes hours / forgotten</li><li>Bug found days later</li></ul></div>
+    <div class="card b2"><h3 class="green">✅ With Jenkins</h3><ul style="margin-top:8px"><li>Developer pushes code</li><li>Jenkins detects the push</li><li>Runs tests in seconds</li><li>Bug found immediately</li></ul></div>
+  </div>
+</div>
+
+<!-- 33. JENKINS vs GHA -->
+<div class="slide">
+  <h2 class="red">Jenkins vs GitHub Actions</h2>
+  <table>
+    <thead><tr><th>Feature</th><th>Jenkins</th><th>GitHub Actions</th></tr></thead>
+    <tbody>
+      <tr><td>Hosted</td><td>Self-hosted (your server)</td><td>Cloud (GitHub's servers)</td></tr>
+      <tr><td>Config file</td><td><code>Jenkinsfile</code></td><td><code>.github/workflows/*.yml</code></td></tr>
+      <tr><td>UI</td><td>Rich browser dashboard</td><td>GitHub web UI</td></tr>
+      <tr><td>License</td><td>Free, open source</td><td>Free for public repos</td></tr>
+      <tr><td>Used by</td><td>Large enterprises, SAP</td><td>Modern open source projects</td></tr>
+    </tbody>
+  </table>
+  <p class="note r mt">Both do the same job — automate build, test, deploy. In SAP — GitHub Actions is disabled on github.tools.sap, so Jenkins or SAP CI/CD Service is used for real projects.</p>
+</div>
+
+<!-- 34. JENKINS CONS → GHA FIXES -->
+<div class="slide">
+  <h2 class="red">Jenkins Cons → Fixed by GitHub Actions</h2>
+  <table>
+    <thead><tr><th>Jenkins Con</th><th>GitHub Actions Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Dedicated server — you install, maintain, pay for it</td><td><span class="green">Serverless</span> — GitHub runs it on their infrastructure</td></tr>
+      <tr><td>Hours of setup — Java, plugins, credentials, jobs</td><td><span class="green">5 minutes</span> — one YAML file in your repo</td></tr>
+      <tr><td>1800+ plugins that break each other</td><td><span class="green">Versioned Actions</span> from marketplace — no conflicts</td></tr>
+      <tr><td>Pipeline config lives in Jenkins UI — server crash = config gone</td><td><span class="green">Pipeline is a file in repo</span> — version controlled</td></tr>
+      <tr><td>Complex GitHub integration — plugins, webhooks, SSH keys</td><td><span class="green">Native</span> — GitHub Actions IS GitHub, zero config</td></tr>
+      <tr><td>Manual scaling — add agents, configure master-agent</td><td><span class="green">Auto-scales</span> — GitHub handles 1 or 1000 pipelines</td></tr>
+      <tr><td>Blue Ocean deprecated 2022</td><td><span class="green">Modern GitHub UI</span> — same place as PRs</td></tr>
+      <tr><td>You maintain all infrastructure — updates, backups, downtime</td><td><span class="green">GitHub maintains it</span> — zero ops overhead</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 35. CORE CONCEPTS -->
+<div class="slide">
+  <h2 class="red">Jenkins Core Concepts</h2>
+  <div class="cols c3">
+    <div class="card"><h3 class="red">Job / Project</h3><p style="font-size:.88rem;margin-top:6px">A configured task in Jenkins. Define WHAT to do. Jenkins does it when triggered.</p><p style="margin-top:8px"><span class="badge bb">Freestyle</span> <span class="badge bo">Pipeline</span></p></div>
+    <div class="card"><h3 class="red">Build</h3><p style="font-size:.88rem;margin-top:6px">One execution of a job. Builds are numbered #1, #2, #3...</p><p style="margin-top:8px"><span class="badge bg">GREEN = SUCCESS</span></p><p style="margin-top:4px"><span class="badge br2">RED = FAILURE</span></p></div>
+    <div class="card"><h3 class="red">Pipeline</h3><p style="font-size:.88rem;margin-top:6px">Sequence of stages. If any stage fails, subsequent stages are skipped.</p><p class="small" style="margin-top:8px">Checkout → Build → Test → Deploy</p></div>
+    <div class="card"><h3 class="red">Stage</h3><p style="font-size:.88rem;margin-top:6px">Named section of the pipeline. Jenkins shows each stage's status separately.</p></div>
+    <div class="card"><h3 class="red">Agent</h3><p style="font-size:.88rem;margin-top:6px">The machine that runs the pipeline. <code>agent any</code> = use any available machine.</p></div>
+    <div class="card"><h3 class="red">Jenkinsfile</h3><p style="font-size:.88rem;margin-top:6px">Text file in your repo that defines the entire pipeline as code. Jenkins reads it automatically.</p><p style="margin-top:6px"><span class="badge bo">Pipeline as Code</span></p></div>
+  </div>
+</div>
+
+<!-- 36. JENKINSFILE -->
+<div class="slide">
+  <h2 class="red">Jenkinsfile — The Pipeline Definition</h2>
+  <pre><code><span class="fn">pipeline</span> {
+    <span class="kw">agent</span> any           <span class="cmt">// run on any available Jenkins agent</span>
+
+    <span class="kw">stages</span> {
+        <span class="fn">stage</span>(<span class="str">'Checkout'</span>) {
+            <span class="kw">steps</span> { <span class="kw">git</span> branch: <span class="str">'main'</span>, url: <span class="str">'https://github.com/YOUR/repo.git'</span> }
+        }
+        <span class="fn">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> {
+                sh <span class="str">'echo "Build stage running"'</span>
+                sh <span class="str">'python3 --version'</span>
+            }
+        }
+        <span class="fn">stage</span>(<span class="str">'Test'</span>) {
+            <span class="kw">steps</span> { sh <span class="str">'python3 test_calculator.py'</span> }  <span class="cmt">// FAIL here = Red build, Deploy skipped</span>
+        }
+        <span class="fn">stage</span>(<span class="str">'Deploy'</span>) {
+            <span class="kw">steps</span> { sh <span class="str">'echo "Deploy placeholder"'</span> }  <span class="cmt">// only runs if Test passes</span>
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 37. JENKINSFILE EXPLAINED -->
+<div class="slide">
+  <h2 class="red">Jenkinsfile — Every Keyword Explained</h2>
+  <table>
+    <thead><tr><th>Instruction</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>pipeline {}</code></td><td>The entire pipeline definition</td></tr>
+      <tr><td><code>agent any</code></td><td>Run on any available Jenkins machine</td></tr>
+      <tr><td><code>stages {}</code></td><td>Container for all stages</td></tr>
+      <tr><td><code>stage('Name') {}</code></td><td>A named step in the pipeline</td></tr>
+      <tr><td><code>steps {}</code></td><td>Commands to run inside a stage</td></tr>
+      <tr><td><code>sh '...'</code></td><td>Run a shell command on the agent</td></tr>
+      <tr><td><code>git branch: 'main', url: '...'</code></td><td>Pull code from GitHub</td></tr>
+    </tbody>
+  </table>
+  <p class="note r mt"><strong>Why keep Jenkinsfile in the repo?</strong> If Jenkins server crashes and config was only in the UI, everything is lost. With Jenkinsfile in the repo, you can recreate the pipeline on a new server in minutes.</p>
+</div>
+
+<!-- 38. SETUP -->
+<div class="slide">
+  <h2 class="red">Prerequisites — Jenkins Setup (Mac)</h2>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+    <div class="step"><div class="snum r">1</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:6px">Install Jenkins via Homebrew</h3><pre style="margin:0"><code><span class="cmd">brew install jenkins-lts</span>
+<span class="cmd">brew services start jenkins-lts</span>
+<span class="cmt"># Jenkins runs on http://localhost:8080</span></code></pre></div></div>
+    <div class="step"><div class="snum r">2</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:6px">Unlock Jenkins (first time only)</h3><pre style="margin:0"><code><span class="cmd">cat</span> ~/.jenkins/secrets/initialAdminPassword
+<span class="cmt"># Open http://localhost:8080 → paste password → Install suggested plugins → create admin</span></code></pre></div></div>
+    <div class="step"><div class="snum r">3</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:6px">Clone your repo</h3><pre style="margin:0"><code><span class="cmd">git clone</span> https://github.com/YOUR_USERNAME/Jenkins.git
+<span class="cmd">cd</span> Jenkins</code></pre></div></div>
+  </div>
+</div>
+
+<!-- 39. FILES OVERVIEW -->
+<div class="slide">
+  <h2 class="red">Files Used in This Lab</h2>
+  <div class="card b1 mb full"><pre style="background:transparent;border:none;padding:0"><code>Jenkins/
+├── <span class="str">calculator.py</span>        ← the application (what we're testing)
+├── <span class="str">test_calculator.py</span>   ← the tests (what Jenkins runs)
+└── <span class="str">Jenkinsfile</span>          ← the pipeline definition (what Jenkins follows)</code></pre></div>
+  <div class="cols c3">
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">🐍</div><h3 class="blue">calculator.py</h3><p style="font-size:.88rem;margin-top:6px">The Python application — add, subtract, multiply, divide. In a real project this would be your entire web app.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">✅</div><h3 class="green">test_calculator.py</h3><p style="font-size:.88rem;margin-top:6px">Assertions that verify each function. Jenkins runs this in the Test stage.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">📋</div><h3 class="red">Jenkinsfile</h3><p style="font-size:.88rem;margin-top:6px">Tells Jenkins what to do. Lives in the repo — pipeline versioned alongside code.</p></div>
+  </div>
+</div>
+
+<!-- 40. CALCULATOR.PY -->
+<div class="slide">
+  <h2 class="red">calculator.py — The Application</h2>
+  <pre><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a + b         <span class="cmt"># correct version</span>
+
+<span class="kw">def</span> <span class="fn">subtract</span>(a, b):
+    <span class="kw">return</span> a - b
+
+<span class="kw">def</span> <span class="fn">multiply</span>(a, b):
+    <span class="kw">return</span> a * b
+
+<span class="kw">def</span> <span class="fn">divide</span>(a, b):
+    <span class="kw">if</span> b == 0:
+        <span class="kw">return</span> None
+    <span class="kw">return</span> a / b</code></pre>
+  <p class="note r mt"><strong>Why this matters:</strong> When a developer accidentally changes <code>return a + b</code> to <code>return a - b</code>, the tests catch it immediately on the next push. Without CI, this bug might reach production.</p>
+</div>
+
+<!-- 41. TASK 1 — FREESTYLE -->
+<div class="slide">
+  <h2 class="red">Task 1 — Freestyle Job</h2>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+    <div class="step"><div class="snum r">1</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Create job</h3><p style="font-size:.88rem">New Item → name: <code>calculator-freestyle</code> → <strong>Freestyle project</strong> → OK</p></div></div>
+    <div class="step"><div class="snum r">2</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Source Code Management</h3><p style="font-size:.88rem">Select <strong>Git</strong> → URL: <code>https://github.com/YOUR/Jenkins.git</code> → Branch: <code>*/main</code></p></div></div>
+    <div class="step"><div class="snum r">3</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Build Steps → Execute shell</h3><pre style="margin-top:6px"><code><span class="cmd">echo</span> "Listing files" &amp;&amp; ls
+python3 --version</code></pre></div></div>
+    <div class="step"><div class="snum r">4</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Build Now → verify</h3><p style="font-size:.88rem">Build Now → click build #1 → <strong>Console Output</strong> → look for <code>Finished: SUCCESS</code></p></div></div>
+  </div>
+</div>
+
+<!-- 42. TASK 2 — PIPELINE -->
+<div class="slide">
+  <h2 class="red">Task 2 — Pipeline Job with Jenkinsfile</h2>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+    <div class="step"><div class="snum r">1</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Push all 3 files to GitHub</h3><pre style="margin-top:4px"><code><span class="cmd">git add</span> calculator.py test_calculator.py Jenkinsfile
+<span class="cmd">git commit</span> -m "Add calculator app and Jenkinsfile"
+<span class="cmd">git push</span> origin main</code></pre></div></div>
+    <div class="step"><div class="snum r">2</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Create Pipeline job</h3><p style="font-size:.88rem">New Item → name: <code>calculator-pipeline</code> → <strong>Pipeline</strong> → OK</p></div></div>
+    <div class="step"><div class="snum r">3</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Pipeline script from SCM</h3><p style="font-size:.88rem">Pipeline tab → Definition: <strong>Pipeline script from SCM</strong> → SCM: Git → URL → Branch: <code>*/main</code> → Script Path: <code>Jenkinsfile</code> → Save</p></div></div>
+    <div class="step"><div class="snum r">4</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Build Now → watch stages</h3><p style="font-size:.88rem">Checkout → Build → Test → Deploy. Console: <code>All tests passed</code> → <code>Finished: SUCCESS</code></p></div></div>
+  </div>
+</div>
+
+<!-- 43. TASK 3 — RED BUILD -->
+<div class="slide">
+  <h2 class="red">Task 3 — Trigger a Red Build</h2>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+    <div class="step"><div class="snum r">1</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Enable SCM Polling</h3><p style="font-size:.88rem">Configure → Triggers → Poll SCM → Schedule: <code>* * * * *</code> (every minute) → Save</p></div></div>
+    <div class="step"><div class="snum r">2</div><div class="card full" style="padding:10px 14px"><h3 style="margin-bottom:4px">Introduce a bug</h3><pre style="margin-top:4px"><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a - b    <span class="cmt"># BUG: should be a + b</span></code></pre><pre style="margin-top:4px"><code><span class="cmd">git add</span> calculator.py &amp;&amp; <span class="cmd">git commit</span> -m "Added fault code" &amp;&amp; <span class="cmd">git push</span></code></pre></div></div>
+  </div>
+  <div class="card br mt full"><p><strong>Wait up to 1 minute.</strong> Jenkins detects the push and runs the pipeline.</p><p style="margin-top:8px"><span class="red">Expected:</span> Test stage FAILS → <code>AssertionError</code> because <code>add(2,3)</code> returns <code>-1</code> not <code>5</code>. Deploy skipped. Build = <strong class="red">RED ✗</strong></p></div>
+</div>
+
+<!-- 44. TASK 3 — GREEN BUILD -->
+<div class="slide">
+  <h2 class="red">Task 3 — Fix the Bug → Green Build</h2>
+  <div class="step"><div class="snum g">3</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:6px">Fix calculator.py</h3><pre style="margin-top:4px"><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a + b    <span class="cmt"># FIXED</span></code></pre><pre style="margin-top:4px"><code><span class="cmd">git add</span> calculator.py &amp;&amp; <span class="cmd">git commit</span> -m "Fixed add function" &amp;&amp; <span class="cmd">git push</span></code></pre></div></div>
+  <div class="card b2 mt full"><p><strong>Wait up to 1 minute.</strong> Jenkins re-runs.</p><p style="margin-top:8px"><span class="green">Expected:</span> All stages pass. "All tests passed". Build = <strong class="green">GREEN ✓</strong></p></div>
+  <div class="pipe mt">
+    <div class="pbox">Push buggy code</div><div class="parr">→</div>
+    <div class="pbox" style="border-color:#e74c3c">Test FAILS<br/><span class="red">RED ✗</span></div><div class="parr">→</div>
+    <div class="pbox">Fix &amp; push</div><div class="parr">→</div>
+    <div class="pbox" style="border-color:#3fb950">All PASS<br/><span class="green">GREEN ✓</span></div>
+  </div>
+  <div class="card b2 mt full center"><p><strong class="green">This is EXACTLY how CI/CD works in real software teams.</strong> Every company using DevOps does exactly this. The test file is just as important as the application.</p></div>
+</div>
+
+<!-- 45. JENKINS QUICK REF -->
+<div class="slide">
+  <h2 class="red">Quick Reference</h2>
+  <table class="mb">
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>brew services start jenkins-lts</code></td><td>Start Jenkins</td></tr>
+      <tr><td><code>brew services stop jenkins-lts</code></td><td>Stop Jenkins</td></tr>
+      <tr><td><code>brew services restart jenkins-lts</code></td><td>Restart Jenkins</td></tr>
+      <tr><td><code>cat ~/.jenkins/secrets/initialAdminPassword</code></td><td>Get initial admin password</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Error</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td><code>python3: not found</code></td><td>Install Python on the Jenkins machine</td></tr>
+      <tr><td><code>No module named 'calculator'</code></td><td>Check filename spelling with <code>ls -la</code></td></tr>
+      <tr><td>Branch ref not found</td><td>Change Branch Specifier to <code>*/main</code></td></tr>
+      <tr><td>Build doesn't auto-trigger</td><td>Configure → Triggers → Poll SCM → <code>* * * * *</code></td></tr>
+      <tr><td>Port 8080 already in use</td><td>Stop Docker or change Jenkins port</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════ DOCKER ═══════════════ -->
+
+<!-- 20. DOCKER TITLE -->
+<div class="slide dockerbg">
+  <div style="font-size:4rem;margin-bottom:14px">🐳</div>
+  <h1>Docker</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:10px">SAP DevOps Training · August 2026</p>
+</div>
+
+<!-- 21. DOCKER PROBLEM -->
+<div class="slide">
+  <h2 class="blue">The Problem Docker Solves</h2>
+  <div class="cols c2">
+    <div class="card br"><h3 class="red">😤 Without Docker</h3><ul style="margin-top:8px"><li>Code works on your MacBook</li><li>Colleague runs it — it crashes</li><li>Different Java version</li><li>Different OS, different libraries</li><li>"But it works on <em>my</em> machine!"</li></ul></div>
+    <div class="card b2"><h3 class="green">✅ With Docker</h3><ul style="margin-top:8px"><li>Package your app + its environment</li><li>Same image runs everywhere</li><li>Developer laptop</li><li>CI/CD pipeline server</li><li>Cloud (BTP, AWS, Azure)</li></ul></div>
+  </div>
+  <p class="note mt center">Docker packages your app into a portable box — OS, runtime, dependencies included.</p>
+</div>
+
+<!-- 22. WHAT IS DOCKER -->
+<div class="slide">
+  <h2 class="blue">What is Docker?</h2>
+  <div class="cols c3">
+    <div class="card center"><div style="font-size:2rem;margin-bottom:10px">📄</div><h3 class="blue">Dockerfile</h3><p style="font-size:.9rem;margin-top:8px">A recipe — instructions to build your app's environment step by step</p></div>
+    <div class="card center"><div style="font-size:2rem;margin-bottom:10px">📦</div><h3 class="green">Image</h3><p style="font-size:.9rem;margin-top:8px">The built package — app + OS + runtime, frozen and ready to ship</p></div>
+    <div class="card center"><div style="font-size:2rem;margin-bottom:10px">🏃</div><h3 class="orange">Container</h3><p style="font-size:.9rem;margin-top:8px">A running instance of an image — isolated, lightweight, disposable</p></div>
+  </div>
+  <div class="pipe mt">
+    <div class="pbox">You write<br/><span class="blue">Dockerfile</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#58a6ff"><code>docker build</code><br/>creates <span class="green">Image</span></div>
+    <div class="parr">→</div>
+    <div class="pbox" style="border-color:#3fb950"><code>docker run</code><br/>starts <span class="orange">Container</span></div>
+  </div>
+</div>
+
+<!-- 23. VM vs CONTAINER -->
+<div class="slide">
+  <h2 class="blue">VM vs Container</h2>
+  <table>
+    <thead><tr><th></th><th>Virtual Machine (VM)</th><th>Container</th></tr></thead>
+    <tbody>
+      <tr><td>What it includes</td><td>Full OS + hypervisor + app</td><td>App + libraries (shares host OS)</td></tr>
+      <tr><td>Size</td><td>Gigabytes</td><td>Megabytes</td></tr>
+      <tr><td>Startup time</td><td>Minutes</td><td>Seconds</td></tr>
+      <tr><td>Isolation</td><td>Complete (own OS kernel)</td><td>Process-level (shared kernel)</td></tr>
+      <tr><td>Use case</td><td>Run different operating systems</td><td>Package and ship apps</td></tr>
+    </tbody>
+  </table>
+  <p class="note mt center">Containers are like apartments in a building — separate living spaces, shared foundation.</p>
+</div>
+
+<!-- 24. DOCKERFILE STAGE 1 -->
+<div class="slide">
+  <h2 class="blue">Our Dockerfile — Stage 1: Build</h2>
+  <pre><code><span class="cmt"># Stage 1 — compile the app using Maven + JDK</span>
+<span class="kw">FROM</span> <span class="str">maven:3.9-eclipse-temurin-17</span> <span class="kw">AS</span> build
+<span class="cmt"># Start with a machine that has Maven and JDK 17 installed</span>
+
+<span class="kw">WORKDIR</span> /app
+<span class="cmt"># Create /app folder and work inside it (like: mkdir /app && cd /app)</span>
+
+<span class="kw">COPY</span> pom.xml ./
+<span class="kw">RUN</span> mvn dependency:go-offline -q
+<span class="cmt"># Copy dependency list first, download all libraries
+# Docker skips this step next time if pom.xml didn't change (caching)</span>
+
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn package -DskipTests -q
+<span class="cmt"># Copy source code, compile → produces devops-demo-app-1.0.0.jar</span></code></pre>
+  <p class="note mt">At this point: the JAR exists inside Stage 1. Stage 1 has Maven + JDK (~500 MB).</p>
+</div>
+
+<!-- 25. DOCKERFILE STAGE 2 -->
+<div class="slide">
+  <h2 class="blue">Our Dockerfile — Stage 2: Runtime</h2>
+  <pre><code><span class="cmt"># Stage 2 — fresh start, JRE only, no build tools</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jre</span>
+<span class="cmt"># New base image — just the JRE (runs Java, but can't compile)
+# This is the image that gets deployed</span>
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="kw">COPY</span> <span class="flag">--from=build</span> /app/target/devops-demo-app-1.0.0.jar app.jar
+<span class="cmt"># From Stage 1, take ONLY the JAR. Everything else is thrown away.</span>
+
+<span class="kw">EXPOSE</span> 8080
+<span class="cmt"># Documents that this app listens on port 8080</span>
+
+<span class="kw">ENTRYPOINT</span> ["java", "-jar", "app.jar"]
+<span class="cmt"># When the container starts, run: java -jar app.jar</span></code></pre>
+  <p class="note mt">Final image: JRE + JAR only (~180 MB). Maven and JDK are gone. Smaller = faster deploys.</p>
+</div>
+
+<!-- 26. WHY 2 STAGES -->
+<div class="slide">
+  <h2 class="blue">Why Two Stages?</h2>
+  <div class="cols c2">
+    <div class="card br"><div class="badge br2 mb" style="display:inline-block">Stage 1 — Temporary</div>
+      <ul style="margin-top:10px"><li>Maven 3.9</li><li>JDK 17 (full compiler)</li><li>Source code</li><li>Downloaded libraries</li></ul>
+      <p style="margin-top:12px;font-size:.95rem">Size: <span class="red">~500 MB</span></p>
+      <p class="small" style="margin-top:4px">Gets thrown away after build</p>
+    </div>
+    <div class="card b2"><div class="badge bg mb" style="display:inline-block">Stage 2 — Final Image ✓</div>
+      <ul style="margin-top:10px"><li>JRE 17 (run only)</li><li>devops-demo-app.jar</li></ul>
+      <p style="margin-top:12px;font-size:.95rem">Size: <span class="green">~180 MB</span></p>
+      <p class="small" style="margin-top:4px">This is what gets deployed</p>
+    </div>
+  </div>
+  <p class="note mt center">Analogy: you use a full workshop to build furniture, then deliver only the finished piece — not the entire workshop.</p>
+</div>
+
+<!-- 27. DOCKER COMMANDS -->
+<div class="slide">
+  <h2 class="blue">Running Docker — Step by Step</h2>
+  <div style="width:100%;display:flex;flex-direction:column;gap:12px">
+    <div class="step"><div class="snum">1</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:8px">Build the image</h3><pre style="margin:0"><code><span class="cmd">docker build</span> <span class="flag">-t</span> devops-demo-app <span class="str">./app</span></code></pre><p class="small mt" style="margin-top:6px">Runs Dockerfile top to bottom. First run ~2 min (downloading base images), instant after (cached).</p></div></div>
+    <div class="step"><div class="snum">2</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:8px">Run a container</h3><pre style="margin:0"><code><span class="cmd">docker run</span> <span class="flag">-p</span> 8080:8080 <span class="flag">--name</span> demo-app devops-demo-app</code></pre><p class="small" style="margin-top:6px"><span class="flag">-p 8080:8080</span> = your laptop port → container port</p></div></div>
+    <div class="step"><div class="snum">3</div><div class="card full" style="padding:12px 16px"><h3 style="margin-bottom:8px">Test it</h3><pre style="margin:0"><code><span class="cmd">curl</span> http://localhost:8080/
+<span class="cmt"># → Hello from Nandini and Abhignan This is a devops demo</span></code></pre></div></div>
+  </div>
+</div>
+
+<!-- 28. DOCKER COMMAND REF -->
+<div class="slide">
+  <h2 class="blue">Useful Docker Commands</h2>
+  <table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>docker build -t myapp .</code></td><td>Build image from Dockerfile in current folder</td></tr>
+      <tr><td><code>docker run -p 8080:8080 myapp</code></td><td>Start container, map port 8080</td></tr>
+      <tr><td><code>docker ps</code></td><td>List all running containers</td></tr>
+      <tr><td><code>docker images</code></td><td>List all images on your machine</td></tr>
+      <tr><td><code>docker stop demo-app</code></td><td>Stop a running container</td></tr>
+      <tr><td><code>docker rm demo-app</code></td><td>Delete the container (image stays)</td></tr>
+      <tr><td><code>docker logs demo-app</code></td><td>View logs from a container</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 29. DOCKER DESKTOP -->
+<div class="slide">
+  <h2 class="blue">Docker Desktop — What to Look At</h2>
+  <div class="cols c3">
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">📦</div><h3 class="green">Images tab</h3><p style="font-size:.88rem;margin-top:6px">See <code>devops-demo-app</code> — name, size (~180 MB). This is your packaged app.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">🏃</div><h3 class="blue">Containers tab</h3><p style="font-size:.88rem;margin-top:6px">See <code>demo-app</code> running. Click the port link → opens app in browser.</p></div>
+    <div class="card center"><div style="font-size:1.8rem;margin-bottom:8px">📋</div><h3 class="orange">Logs tab</h3><p style="font-size:.88rem;margin-top:6px">Click container → Logs. See Spring Boot startup. First place to check if something breaks.</p></div>
+  </div>
+  <div class="card b2 mt full center"><p><strong class="green">Key demo:</strong> Stop the container → refresh browser → connection refused. Start again → app is back.</p><p class="small mt">"No container = no app. That's what Kubernetes solves."</p></div>
+</div>
+
+</div><!-- end deck -->
+
+<!-- Section nav -->
+<div id="secnav">
+  <button onclick="jumpTo(0)" id="btn-devops">🔄 DevOps</button>
+  <button onclick="jumpTo(20)" id="btn-jenkins">🔧 Jenkins</button>
+  <button onclick="jumpTo(35)" id="btn-docker">🐳 Docker</button>
+</div>
+
+<div id="progress"></div>
+<div id="nav">
+  <button onclick="go(-1)">← Prev</button>
+  <span id="counter"></span>
+  <button onclick="go(1)">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+
+const sections = [
+  {start:0,end:19,btn:'btn-devops',cls:'active',bar:'#58a6ff'},
+  {start:20,end:34,btn:'btn-jenkins',cls:'act-j',bar:'#e74c3c'},
+  {start:35,end:44,btn:'btn-docker',cls:'act-d',bar:'#58a6ff'}
+];
+
+function show(n){
+  slides[current].classList.remove('active');
+  current = Math.max(0,Math.min(n,slides.length-1));
+  slides[current].classList.add('active');
+  document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;
+  const pct=((current+1)/slides.length)*100;
+  const prog=document.getElementById('progress');
+  prog.style.width=pct+'%';
+  // update section nav
+  ['btn-devops','btn-jenkins','btn-docker'].forEach(id=>{
+    const b=document.getElementById(id);
+    b.className='';
+  });
+  sections.forEach(s=>{
+    if(current>=s.start&&current<=s.end){
+      document.getElementById(s.btn).className=s.cls;
+      prog.style.background=s.bar;
+    }
+  });
+}
+function go(d){show(current+d)}
+function jumpTo(n){show(n)}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+show(0);
+</script>
+</body>
+</html>

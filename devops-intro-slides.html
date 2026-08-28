@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevOps Introduction — SAP Training</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .deck { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 44px 80px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .slide.active { display: flex; opacity: 1; }
+
+    /* section colours */
+    :root {
+      --s1: #58a6ff;   /* devops blue */
+      --s2: #3fb950;   /* git green */
+      --s3: #f0883e;   /* cicd orange */
+    }
+
+    h1  { font-size: 3rem; font-weight: 800; line-height: 1.1; }
+    h2  { font-size: 1.85rem; font-weight: 700; margin-bottom: 24px; }
+    h3  { font-size: 1.1rem;  font-weight: 600; margin-bottom: 8px; }
+    p, li { font-size: 0.97rem; line-height: 1.8; color: #c9d1d9; }
+    ul { list-style: none; }
+    ul li::before { content: "▸ "; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em;
+           background: #21262d; padding: 1px 6px; border-radius: 4px; }
+
+    .blue   { color: var(--s1); }
+    .green  { color: var(--s2); }
+    .orange { color: var(--s3); }
+    .red    { color: #e74c3c; }
+    .purple { color: #bc8cff; }
+    .yellow { color: #d29922; }
+    .gray   { color: #8b949e; }
+
+    /* ── cards ── */
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .card.b1 { border-color: var(--s1); }
+    .card.b2 { border-color: var(--s2); }
+    .card.b3 { border-color: var(--s3); }
+    .card.red { border-color: #e74c3c; }
+
+    /* ── grid ── */
+    .cols   { display: grid; gap: 20px; width: 100%; }
+    .c2     { grid-template-columns: 1fr 1fr; }
+    .c3     { grid-template-columns: 1fr 1fr 1fr; }
+    .c4     { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    /* ── code block ── */
+    pre {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      width: 100%;
+    }
+    .kw  { color: #ff7b72; }
+    .str { color: #a5d6ff; }
+    .cmt { color: #8b949e; font-style: italic; }
+    .cmd { color: #3fb950; }
+    .fn  { color: #d2a8ff; }
+
+    /* ── badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .b-blue   { background: #0d1f38; color: var(--s1);  border: 1px solid var(--s1); }
+    .b-green  { background: #0d2818; color: var(--s2);  border: 1px solid var(--s2); }
+    .b-orange { background: #2d1e0a; color: var(--s3);  border: 1px solid var(--s3); }
+    .b-red    { background: #2d1010; color: #e74c3c;    border: 1px solid #e74c3c; }
+    .b-purple { background: #1e1038; color: #bc8cff;    border: 1px solid #bc8cff; }
+
+    /* ── section title slides ── */
+    .sec-1 { background: radial-gradient(ellipse at 55% 40%, #0d1f3a 0%, #0d1117 65%); }
+    .sec-2 { background: radial-gradient(ellipse at 55% 40%, #0d2818 0%, #0d1117 65%); }
+    .sec-3 { background: radial-gradient(ellipse at 55% 40%, #2d1e0a 0%, #0d1117 65%); }
+    .title-slide { background: radial-gradient(ellipse at 50% 40%, #1a1030 0%, #0d1117 70%); }
+
+    /* ── loop diagram ── */
+    .loop-ring {
+      display: flex; justify-content: center; align-items: center;
+      position: relative; width: 100%; margin-top: 10px;
+    }
+    .loop-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; padding: 10px 14px; border-radius: 10px;
+      background: #161b22; border: 1px solid #30363d;
+      font-size: 0.82rem; text-align: center; min-width: 88px;
+    }
+    .loop-item .icon { font-size: 1.5rem; }
+    .loop-item.dev  { border-color: var(--s1); }
+    .loop-item.ops  { border-color: var(--s2); }
+    .loop-arr { color: #8b949e; font-size: 1rem; margin: 0 2px; align-self: center; }
+
+    /* ── pipeline ── */
+    .pipe {
+      display: flex; align-items: center; gap: 0; width: 100%; margin-top: 8px;
+    }
+    .pipe-box {
+      flex: 1; background: #161b22; border: 1px solid #30363d;
+      border-radius: 8px; padding: 12px 10px; text-align: center;
+      font-size: 0.82rem;
+    }
+    .pipe-arr { color: #8b949e; font-size: 1.3rem; margin: 0 4px; }
+
+    /* ── note / success ── */
+    .note {
+      border-left: 3px solid var(--s1);
+      background: #0d1f38; padding: 12px 16px;
+      border-radius: 0 8px 8px 0; font-size: 0.9rem;
+      color: #c9d1d9; width: 100%;
+    }
+    .note.g { border-color: var(--s2); background: #0d2818; }
+    .note.o { border-color: var(--s3); background: #2d1e0a; }
+
+    /* ── table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th { background: #21262d; padding: 10px 14px; text-align: left;
+         color: #e6edf3; font-weight: 600; border-bottom: 1px solid #30363d; }
+    td { padding: 10px 14px; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── timing chip ── */
+    .timing {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #21262d; border: 1px solid #30363d;
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 0.78rem; color: #8b949e; margin-bottom: 6px;
+    }
+
+    /* ── step ── */
+    .step { display: flex; gap: 14px; align-items: flex-start; }
+    .step-num {
+      min-width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+      background: var(--s1); color: #0d1117;
+    }
+    .step-num.g { background: var(--s2); }
+    .step-num.o { background: var(--s3); }
+
+    /* ── nav ── */
+    #progress { position: fixed; bottom: 0; left: 0; height: 3px;
+                background: linear-gradient(90deg, var(--s1), var(--s3));
+                transition: width 0.3s ease; z-index: 10; }
+    #nav { position: fixed; bottom: 18px; right: 22px;
+           display: flex; align-items: center; gap: 10px; z-index: 10; }
+    #nav button { background: #21262d; border: 1px solid #30363d;
+                  color: #e6edf3; padding: 7px 16px; border-radius: 8px;
+                  cursor: pointer; font-size: 0.88rem; transition: background 0.2s; }
+    #nav button:hover { background: #30363d; }
+    #counter { color: #8b949e; font-size: 0.82rem; min-width: 55px; text-align: center; }
+    .slide-label { position: fixed; top: 18px; right: 22px;
+                   color: #30363d; font-size: 0.78rem; z-index: 10; }
+
+    /* section indicator */
+    .sec-tag {
+      position: fixed; top: 18px; left: 22px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; z-index: 10; padding: 3px 12px;
+      border-radius: 20px; display: none;
+    }
+
+    .full { width: 100%; }
+    .mt   { margin-top: 14px; }
+    .mb   { margin-bottom: 12px; }
+    .center { text-align: center; }
+    .small  { font-size: 0.82rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ══════════════════════════════════════════
+     TITLE
+══════════════════════════════════════════ -->
+<div class="slide title-slide">
+  <div style="font-size:4rem;margin-bottom:16px;">🚀</div>
+  <h1 style="font-size:3.5rem;">DevOps</h1>
+  <p style="font-size:1.2rem;color:#8b949e;margin-top:10px;">SAP Scholar Program · August 28, 2026</p>
+  <p style="font-size:1rem;color:#bc8cff;margin-top:8px;">Trainer: Abhinav Yadav</p>
+  <div style="display:flex;gap:12px;margin-top:28px;">
+    <span class="badge b-blue">Session 1 — 30 min</span>
+    <span class="badge b-green">Session 2 — 20 min</span>
+    <span class="badge b-orange">Session 3 — 25 min</span>
+  </div>
+  <p style="margin-top:24px;font-size:0.9rem;color:#8b949e;">Press → to begin</p>
+</div>
+
+<!-- ══ TODAY'S AGENDA ══ -->
+<div class="slide">
+  <h2 class="blue">Today's Learning Journey</h2>
+  <div class="cols c3">
+    <div class="card b1" style="padding:24px;">
+      <div style="font-size:2rem;margin-bottom:10px;">🔄</div>
+      <span class="badge b-blue mb" style="display:inline-block;">30 min</span>
+      <h3 class="blue" style="margin-top:8px;">Session 1</h3>
+      <p style="font-size:0.9rem;margin-top:6px;">What is DevOps?</p>
+      <ul style="margin-top:10px;font-size:0.85rem;">
+        <li>Dev vs Ops problem</li>
+        <li>DevOps definition & culture</li>
+        <li>The Infinity Loop</li>
+        <li>All 8 stages explained</li>
+        <li>Tools per stage</li>
+      </ul>
+    </div>
+    <div class="card b2" style="padding:24px;">
+      <div style="font-size:2rem;margin-bottom:10px;">🌿</div>
+      <span class="badge b-green mb" style="display:inline-block;">20 min</span>
+      <h3 class="green" style="margin-top:8px;">Session 2</h3>
+      <p style="font-size:0.9rem;margin-top:6px;">Git's Role in DevOps</p>
+      <ul style="margin-top:10px;font-size:0.85rem;">
+        <li>Why Git is the foundation</li>
+        <li>PR → pipeline trigger</li>
+        <li>Feature branch workflow</li>
+        <li>GitOps concept</li>
+        <li>SAP GitHub Enterprise</li>
+      </ul>
+    </div>
+    <div class="card b3" style="padding:24px;">
+      <div style="font-size:2rem;margin-bottom:10px;">⚙️</div>
+      <span class="badge b-orange mb" style="display:inline-block;">25 min</span>
+      <h3 class="orange" style="margin-top:8px;">Session 3</h3>
+      <p style="font-size:0.9rem;margin-top:6px;">CI/CD + Pipeline Anatomy</p>
+      <ul style="margin-top:10px;font-size:0.85rem;">
+        <li>CI vs CD explained</li>
+        <li>Why CI/CD exists</li>
+        <li>Pipeline anatomy</li>
+        <li>What is an artifact</li>
+        <li>Our real pipeline</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note mt">
+    <strong>The story of today:</strong> Write Code → Git → CI/CD → Build → Deploy to BTP CF → Kubernetes. Every session is one chapter of this story.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SESSION 1 — WHAT IS DEVOPS
+══════════════════════════════════════════ -->
+<div class="slide sec-1">
+  <div class="badge b-blue mb" style="display:inline-block;font-size:0.9rem;padding:6px 20px;">Session 1 · 30 minutes</div>
+  <h1 style="font-size:3.5rem;margin-top:16px;" class="blue">What is DevOps?</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:12px;">The problem, the solution, and the infinity loop</p>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center;">
+    <span class="badge b-blue">Dev vs Ops</span>
+    <span class="badge b-blue">Culture</span>
+    <span class="badge b-blue">Automation</span>
+    <span class="badge b-blue">Infinity Loop</span>
+    <span class="badge b-blue">8 Stages</span>
+  </div>
+</div>
+
+<!-- The Problem -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · What is DevOps?</div>
+  <h2 class="blue">The Problem — Dev vs Ops Silos</h2>
+  <div class="cols c2">
+    <div class="card red">
+      <h3 class="red">😤 Development Team</h3>
+      <ul style="margin-top:10px;">
+        <li>Goal: ship new features fast</li>
+        <li>Writes code on their laptop</li>
+        <li>Tests on their own environment</li>
+        <li>Says: "Works on my machine!"</li>
+        <li>Throws code over the wall to Ops</li>
+        <li>Moves on to next feature</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3 class="red">😤 Operations Team</h3>
+      <ul style="margin-top:10px;">
+        <li>Goal: keep production stable</li>
+        <li>Receives code without warning</li>
+        <li>Environment is different from Dev</li>
+        <li>Says: "It's breaking our servers!"</li>
+        <li>Blames developers for bad code</li>
+        <li>Deployment takes days</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="card">
+      <h3 class="yellow">Result Without DevOps</h3>
+      <ul style="margin-top:8px;font-size:0.9rem;">
+        <li>Releases once a month or less</li>
+        <li>Deployment takes 2-3 days manually</li>
+        <li>Bugs reach production frequently</li>
+        <li>Teams blame each other</li>
+        <li>On-call engineers panic every Friday</li>
+      </ul>
+    </div>
+    <div class="card b1">
+      <h3 class="blue">This is called "Integration Hell"</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Teams build in isolation for weeks. When they finally combine their work — conflicts everywhere. Nobody knows whose change broke what. Untangling takes days.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Restaurant Analogy -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · What is DevOps?</div>
+  <h2 class="blue">The Restaurant Analogy</h2>
+  <div class="cols c2">
+    <div class="card red">
+      <h3 class="red">🍳 Old Way — Silos</h3>
+      <p style="margin-top:8px;font-size:0.9rem;">Chefs (Dev) cook dishes and slide plates through a tiny window. Waiters (Ops) have no idea what's in them.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Customer complains — waiter blames chef</li>
+        <li>Chef says "It was fine when I made it"</li>
+        <li>New dishes take weeks to reach customers</li>
+        <li>Nobody shares responsibility</li>
+      </ul>
+    </div>
+    <div class="card b2">
+      <h3 class="green">🤝 DevOps Way — One Team</h3>
+      <p style="margin-top:8px;font-size:0.9rem;">Chefs and waiters work as one team. They designed the menu together.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Feedback from customers → chefs hear it directly</li>
+        <li>Automatic taste test before every dish leaves kitchen</li>
+        <li>New dish ready? Served within minutes</li>
+        <li>One team, one goal: happy customers</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols c3 mt">
+    <div class="card center" style="padding:16px;">
+      <div style="font-size:1.5rem;">🍽️</div>
+      <p style="font-size:0.82rem;margin-top:6px;">Recipe = <strong class="blue">Code</strong></p>
+    </div>
+    <div class="card center" style="padding:16px;">
+      <div style="font-size:1.5rem;">🔪</div>
+      <p style="font-size:0.82rem;margin-top:6px;">Test kitchen = <strong class="blue">CI</strong></p>
+    </div>
+    <div class="card center" style="padding:16px;">
+      <div style="font-size:1.5rem;">🚀</div>
+      <p style="font-size:0.82rem;margin-top:6px;">Serving the dish = <strong class="blue">CD</strong></p>
+    </div>
+  </div>
+  <p class="note mt"><strong>Key insight:</strong> DevOps isn't just tools. It's a culture shift — shared ownership, shared responsibility, shared metrics. Tools enable it; culture makes it work.</p>
+</div>
+
+<!-- What is DevOps - Definition -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · What is DevOps?</div>
+  <h2 class="blue">What is DevOps?</h2>
+  <div class="card b1 mb full" style="padding:24px;">
+    <p style="font-size:1.05rem;line-height:1.9;">DevOps is a <strong class="blue">culture, mindset, and set of practices</strong> that brings Development and Operations teams together — breaking down silos, automating the software delivery process, and enabling teams to build, test, and release software <strong class="blue">faster, more reliably, and continuously</strong>.</p>
+  </div>
+  <div class="cols c3">
+    <div class="card center">
+      <div style="font-size:2rem;margin-bottom:8px;">🤝</div>
+      <h3 class="blue">Collaboration</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">Dev and Ops share ownership of features from coding to production. Same team, same goals, same on-call.</p>
+    </div>
+    <div class="card center">
+      <div style="font-size:2rem;margin-bottom:8px;">🤖</div>
+      <h3 class="blue">Automation</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">Every manual step between code and production is automated — testing, building, deploying, monitoring.</p>
+    </div>
+    <div class="card center">
+      <div style="font-size:2rem;margin-bottom:8px;">🔁</div>
+      <h3 class="blue">Fast Feedback</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">Know within minutes if something broke. Don't wait days to find out. Small changes, frequent releases.</p>
+    </div>
+  </div>
+  <div class="note mt">
+    <strong>Remember:</strong> DevOps is NOT a job title. It's not "DevOps Engineer = Ops person who knows Docker." It's an organisation-wide philosophy. Dev + Ops + Security + QA — everyone participates.
+  </div>
+</div>
+
+<!-- Infinity Loop Overview -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · The Infinity Loop</div>
+  <h2 class="blue">The DevOps Infinity Loop — ∞</h2>
+  <p style="margin-bottom:16px;font-size:0.95rem;color:#8b949e;">Shaped like ∞ because it never stops — continuous improvement, continuous delivery</p>
+  <div class="loop-ring" style="gap:4px;flex-wrap:wrap;">
+    <div class="loop-item dev"><div class="icon">📋</div><strong class="blue">Plan</strong><span class="small">Jira</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item dev"><div class="icon">💻</div><strong class="blue">Code</strong><span class="small">Git / IDE</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item dev"><div class="icon">🔨</div><strong class="blue">Build</strong><span class="small">Maven / npm</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item dev"><div class="icon">🧪</div><strong class="blue">Test</strong><span class="small">JUnit</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item ops"><div class="icon">📦</div><strong class="green">Release</strong><span class="small">Artifact</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item ops"><div class="icon">🚀</div><strong class="green">Deploy</strong><span class="small">Jenkins / GHA</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item ops"><div class="icon">⚙️</div><strong class="green">Operate</strong><span class="small">K8s / CF</span></div>
+    <div class="loop-arr">→</div>
+    <div class="loop-item ops"><div class="icon">📊</div><strong class="green">Monitor</strong><span class="small">Grafana</span></div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="card b1">
+      <h3 class="blue">Left side — Dev</h3>
+      <p style="font-size:0.9rem;margin-top:6px;">Plan → Code → Build → Test. Developer activities. Every step feeds into the next automatically.</p>
+    </div>
+    <div class="card b2">
+      <h3 class="green">Right side — Ops</h3>
+      <p style="font-size:0.9rem;margin-top:6px;">Release → Deploy → Operate → Monitor. Operations activities. Monitor feeds back to Plan — closing the loop.</p>
+    </div>
+  </div>
+  <p class="note mt"><strong>Key:</strong> The feedback from Monitor goes back to Plan. Users report a bug → it's tracked in Jira → developers fix it → pipeline deploys the fix → monitor confirms. One continuous cycle.</p>
+</div>
+
+<!-- Stage 1: Plan -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Infinity Loop — Stage 1</div>
+  <h2 class="blue">📋 Stage 1 — Plan</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card b1 mb">
+        <h3 class="blue">What happens here?</h3>
+        <ul style="margin-top:8px;">
+          <li>Product team defines what to build next</li>
+          <li>Features broken into user stories</li>
+          <li>Work assigned to developers in sprints</li>
+          <li>Priorities set based on business value</li>
+          <li>Dependencies and risks identified</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="yellow">Tools</h3>
+        <ul style="margin-top:8px;">
+          <li><strong>Jira</strong> — issue tracking, sprint planning</li>
+          <li><strong>Confluence</strong> — documentation</li>
+          <li><strong>Miro</strong> — whiteboarding</li>
+          <li><strong>GitHub Issues</strong> — lightweight tracking</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card b2 mb">
+        <h3 class="green">Agile Connection</h3>
+        <p style="font-size:0.9rem;margin-top:8px;">Planning in DevOps is always Agile — 2-week sprints, not 6-month waterfall plans. Small work chunks, fast feedback.</p>
+      </div>
+      <div class="card b3">
+        <h3 class="orange">SAP Context</h3>
+        <p style="font-size:0.9rem;margin-top:8px;">SAP teams use Jira for sprint planning and GitHub Issues on github.tools.sap for tracking development work against code changes.</p>
+      </div>
+      <div class="note mt">
+        <strong>Why this matters:</strong> Monitor stage feeds back here. Production metrics, user complaints, and bug reports all become new Plan items. The loop closes.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage 2: Code -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Infinity Loop — Stage 2</div>
+  <h2 class="blue">💻 Stage 2 — Code</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card b1 mb">
+        <h3 class="blue">What happens here?</h3>
+        <ul style="margin-top:8px;">
+          <li>Developers write feature code</li>
+          <li>Work on isolated feature branches</li>
+          <li>Code reviewed by teammates via PRs</li>
+          <li>Every change tracked in Git</li>
+          <li>Commit messages document the "why"</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="yellow">Tools</h3>
+        <ul style="margin-top:8px;">
+          <li><strong>VS Code / IntelliJ</strong> — IDE</li>
+          <li><strong>Git</strong> — version control</li>
+          <li><strong>GitHub / GitLab</strong> — code hosting</li>
+          <li><strong>ESLint / SonarQube</strong> — code quality</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card b2 mb">
+        <h3 class="green">DevOps Best Practices</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>Never commit directly to main</li>
+          <li>Small, focused commits</li>
+          <li>Every commit triggers CI automatically</li>
+          <li>Peer review via pull requests</li>
+          <li>Trunk-based development for fast flow</li>
+        </ul>
+      </div>
+      <div class="note mt">
+        <strong>The trigger point:</strong> When a developer pushes code or merges a PR, the CI/CD pipeline fires automatically. Code stage is where the DevOps automation begins.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage 3+4: Build + Test -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Infinity Loop — Stages 3 & 4</div>
+  <h2 class="blue">🔨 Stage 3 — Build &nbsp;·&nbsp; 🧪 Stage 4 — Test</h2>
+  <div class="cols c2">
+    <div class="card b1">
+      <h3 class="blue">🔨 Build</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Transforms source code into a runnable artifact. One command, fully automated.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Compile source code</li>
+        <li>Resolve dependencies (libraries)</li>
+        <li>Package into JAR / WAR / Docker image</li>
+        <li>Generate build reports</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>Maven, Gradle, npm, webpack</strong></p>
+        <p class="small">Our command: <code>mvn package</code></p>
+      </div>
+    </div>
+    <div class="card b2">
+      <h3 class="green">🧪 Test</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Automatically verify the code works correctly. No humans needed.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li><strong>Unit tests</strong> — test individual functions</li>
+        <li><strong>Integration tests</strong> — test modules together</li>
+        <li><strong>UI tests</strong> — test the browser flow</li>
+        <li><strong>Security scans</strong> — check for vulnerabilities</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>JUnit, Mockito, Selenium, SonarQube</strong></p>
+        <p class="small">Our command: <code>mvn test</code></p>
+      </div>
+    </div>
+  </div>
+  <div class="cols c2 mt">
+    <div class="note">
+      <strong>Build fails?</strong> Pipeline stops. Nobody is notified to manually check. The pipeline itself sends a failure notification. Fix before moving on.
+    </div>
+    <div class="note g">
+      <strong>Tests fail?</strong> Bug caught here — before anyone sees it. Cost to fix here: 5 minutes. Cost to fix in production: hours + angry users.
+    </div>
+  </div>
+</div>
+
+<!-- Stage 5+6: Release + Deploy -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Infinity Loop — Stages 5 & 6</div>
+  <h2 class="blue">📦 Stage 5 — Release &nbsp;·&nbsp; 🚀 Stage 6 — Deploy</h2>
+  <div class="cols c2">
+    <div class="card b1">
+      <h3 class="blue">📦 Release</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">The build artifact is versioned and made ready for deployment. This is the handoff from Dev to Ops.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Version the artifact (e.g., v1.2.3)</li>
+        <li>Store in artifact repository</li>
+        <li>Generate release notes</li>
+        <li>Tag the Git commit</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>JFrog Artifactory, Nexus, GitHub Releases</strong></p>
+        <p class="small">Our artifact: <code>devops-demo-app-1.0.0.jar</code></p>
+      </div>
+    </div>
+    <div class="card b2">
+      <h3 class="green">🚀 Deploy</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Push the artifact to the target environment — automated, consistent, no manual SSH into servers.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Deploy to Dev → QA → Production</li>
+        <li>Each environment is a gate</li>
+        <li>Use deployment strategies (Blue-Green, Canary)</li>
+        <li>Health check after deploy</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>Jenkins, GitHub Actions, Kubernetes, BTP CF</strong></p>
+        <p class="small">Our command: <code>cf push -f manifest.yml</code></p>
+      </div>
+    </div>
+  </div>
+  <div class="pipe mt">
+    <div class="pipe-box" style="border-color:var(--s1);">Dev Environment<br/><span class="small">developer testing</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s3);">QA / Staging<br/><span class="small">QA team</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s2);">Production<br/><span class="small">real users ✓</span></div>
+  </div>
+</div>
+
+<!-- Stage 7+8: Operate + Monitor -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Infinity Loop — Stages 7 & 8</div>
+  <h2 class="blue">⚙️ Stage 7 — Operate &nbsp;·&nbsp; 📊 Stage 8 — Monitor</h2>
+  <div class="cols c2">
+    <div class="card b1">
+      <h3 class="blue">⚙️ Operate</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Keep the application running smoothly in production — scale, manage, update infrastructure.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Auto-scaling when traffic spikes</li>
+        <li>Self-healing — restart crashed containers</li>
+        <li>Zero-downtime updates (rolling deploys)</li>
+        <li>Infrastructure as Code — reproducible</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>Kubernetes, Terraform, Ansible, BTP CF</strong></p>
+      </div>
+    </div>
+    <div class="card b2">
+      <h3 class="green">📊 Monitor</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Watch everything happening in production. Catch problems before users report them.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li><strong>Metrics</strong> — CPU, memory, response time, error rate</li>
+        <li><strong>Logs</strong> — what happened, when, who triggered it</li>
+        <li><strong>Traces</strong> — follow one request across services</li>
+        <li><strong>Alerts</strong> — notify on-call if something breaks</li>
+      </ul>
+      <div style="margin-top:12px;">
+        <p class="small">Tools: <strong>Prometheus, Grafana, ELK Stack, Dynatrace</strong></p>
+      </div>
+    </div>
+  </div>
+  <div class="note mt">
+    <strong>The loop closes here:</strong> Monitor finds a bug → creates a Jira ticket → goes into next sprint (Plan) → developer fixes it → pipeline deploys the fix → Monitor confirms it's resolved. This is the ∞ loop.
+  </div>
+</div>
+
+<!-- DevOps Tools Map -->
+<div class="slide">
+  <div class="timing">⏱ Session 1 · Summary</div>
+  <h2 class="blue">DevOps Lifecycle — Tools Per Stage</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>What it does</th><th>Tools</th><th>Today we use</th></tr></thead>
+    <tbody>
+      <tr><td>📋 Plan</td><td>Define what to build</td><td>Jira, Confluence</td><td>GitHub Issues</td></tr>
+      <tr><td>💻 Code</td><td>Write and review code</td><td>VS Code, IntelliJ, Git</td><td>VS Code + Git</td></tr>
+      <tr><td>🔨 Build</td><td>Compile → artifact</td><td>Maven, Gradle, npm</td><td>Maven</td></tr>
+      <tr><td>🧪 Test</td><td>Automated verification</td><td>JUnit, Selenium</td><td>JUnit (mvn test)</td></tr>
+      <tr><td>📦 Release</td><td>Version and store artifact</td><td>Artifactory, Nexus</td><td>GitHub Artifacts</td></tr>
+      <tr><td>🚀 Deploy</td><td>Push to environment</td><td>Jenkins, GitHub Actions</td><td>GitHub Actions + CF</td></tr>
+      <tr><td>⚙️ Operate</td><td>Run and scale</td><td>Kubernetes, Terraform</td><td>BTP Cloud Foundry</td></tr>
+      <tr><td>📊 Monitor</td><td>Watch production</td><td>Prometheus, Grafana</td><td>CF logs</td></tr>
+    </tbody>
+  </table>
+  <div class="note mt"><strong>By end of day</strong> you will touch every single stage in this table — hands-on, with real tools, deploying a real app.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SESSION 2 — GIT'S ROLE IN DEVOPS
+══════════════════════════════════════════ -->
+<div class="slide sec-2">
+  <div class="badge b-green mb" style="display:inline-block;font-size:0.9rem;padding:6px 20px;">Session 2 · 20 minutes</div>
+  <h1 style="font-size:3.5rem;margin-top:16px;" class="green">Git's Role in DevOps</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:12px;">Why Git is the foundation of everything</p>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center;">
+    <span class="badge b-green">Single Source of Truth</span>
+    <span class="badge b-green">PR → Pipeline Trigger</span>
+    <span class="badge b-green">Branch Workflow</span>
+    <span class="badge b-green">GitOps</span>
+    <span class="badge b-green">SAP GitHub Enterprise</span>
+  </div>
+</div>
+
+<!-- Git as Foundation -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 · Git's Role in DevOps</div>
+  <h2 class="green">Why Git is the Foundation of DevOps</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card b2 mb">
+        <h3 class="green">Git is the Starting Gun</h3>
+        <p style="font-size:0.9rem;margin-top:8px;">Every DevOps automation begins with a Git event. Without Git, CI/CD cannot exist. The pipeline doesn't start because someone clicks a button — it starts because someone pushes code.</p>
+      </div>
+      <div class="card b2">
+        <h3 class="green">Single Source of Truth</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>Application code</li>
+          <li>Infrastructure code (Terraform)</li>
+          <li>Pipeline definitions (Jenkinsfile, YAML)</li>
+          <li>Configuration files (manifest.yml)</li>
+          <li>Documentation</li>
+        </ul>
+        <p style="font-size:0.85rem;color:#8b949e;margin-top:8px;">Everything that affects your system lives in Git.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card mb">
+        <h3 class="yellow">Without Git</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>No history — who changed what, when, why?</li>
+          <li>No collaboration — overwriting each other's work</li>
+          <li>No automation — nothing to trigger on</li>
+          <li>No rollback — can't go back to working version</li>
+        </ul>
+      </div>
+      <div class="note g mt">
+        <strong>The DevOps mantra:</strong> "If it's not in Git, it doesn't exist." Your pipeline YAML, your Dockerfile, your Kubernetes manifests — all in Git. Version controlled. Peer reviewed. Auditable.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PR → Pipeline Trigger -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 · Git's Role in DevOps</div>
+  <h2 class="green">How a PR Triggers the CI/CD Pipeline</h2>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+    <div class="step">
+      <div class="step-num g">1</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="green">Developer creates a feature branch</strong>
+        <pre style="margin-top:6px;"><code><span class="cmd">git checkout -b</span> feature/new-hello-message
+<span class="cmt"># works on feature/new-hello-message, not on main</span></code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num g">2</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="green">Developer pushes and opens a Pull Request</strong>
+        <pre style="margin-top:6px;"><code><span class="cmd">git push</span> origin feature/new-hello-message
+<span class="cmt"># Opens PR on GitHub → requests review from teammate</span></code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num g">3</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="green">GitHub fires the CI pipeline automatically</strong>
+        <p style="font-size:0.88rem;margin-top:4px;color:#c9d1d9;">GitHub Actions detects the PR event → runs test + build → posts result as a status check on the PR. Reviewer can see: ✅ All checks passed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num g">4</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="green">PR approved + merged to main → CD fires</strong>
+        <p style="font-size:0.88rem;margin-top:4px;color:#c9d1d9;">Merge to main triggers the full pipeline including deploy. App goes live on BTP CF. Nobody manually did anything.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feature Branch Workflow -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 · Git's Role in DevOps</div>
+  <h2 class="green">Feature Branch Workflow in DevOps</h2>
+  <div class="card b2 mb full">
+    <pre style="background:transparent;border:none;padding:0;"><code><span class="cmt">main branch:  ──●──────────────────────────────●──── production always stable</span>
+                 \                              /
+<span class="cmt">feature branch:  ●──●──●  (dev works here)    ↑</span>
+                              ↓              merge (after CI passes + review)
+                           PR opened
+                           CI runs tests
+                           ✅ All checks passed
+                           Reviewer approves
+</code></pre>
+  </div>
+  <div class="cols c3">
+    <div class="card">
+      <h3 class="green">Main branch</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Always deployable</li>
+        <li>Protected — no direct push</li>
+        <li>Only accepts PRs that pass CI</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="green">Feature branch</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>One branch per feature/bugfix</li>
+        <li>Short-lived — merge quickly</li>
+        <li>Isolated from other work</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="green">Pull Request</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Code review gate</li>
+        <li>CI must pass to merge</li>
+        <li>Discussion, feedback, approval</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note g mt"><strong>Rule:</strong> Nobody pushes directly to main. Ever. Every change goes through a PR. CI runs. Someone reviews. Then it merges. This is what keeps main always deployable.</p>
+</div>
+
+<!-- GitOps -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 · Git's Role in DevOps</div>
+  <h2 class="green">GitOps — Taking Git Even Further</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card b2 mb">
+        <h3 class="green">What is GitOps?</h3>
+        <p style="font-size:0.9rem;margin-top:8px;">GitOps extends the "everything in Git" idea to infrastructure and deployments. The desired state of your entire system — what's deployed, how many replicas, which config — all declared in Git files.</p>
+      </div>
+      <div class="card">
+        <h3 class="yellow">GitOps principle</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>Git is the single source of truth for system state</li>
+          <li>Changes happen through Git — not manual commands</li>
+          <li>System automatically syncs to what Git says</li>
+          <li>Any drift from Git → automatically corrected</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card b2 mb">
+        <h3 class="green">Example</h3>
+        <p style="font-size:0.9rem;margin-top:8px;">You want to scale from 3 to 5 replicas in Kubernetes. Old way: run <code>kubectl scale</code>. GitOps way: change the number in <code>k8s/deployment.yaml</code> and push to Git. The system detects the change and scales automatically.</p>
+      </div>
+      <div class="card">
+        <h3 class="yellow">Tools</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li><strong>ArgoCD</strong> — most popular GitOps tool</li>
+          <li><strong>Flux</strong> — Kubernetes GitOps</li>
+          <li>Both watch a Git repo and sync Kubernetes state</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="note g mt"><strong>Why this matters for you:</strong> Our k8s/ folder in devops-demo-app has deployment.yaml and service.yaml. In a GitOps setup, pushing a change to these files would automatically update the live Kubernetes cluster.</p>
+</div>
+
+<!-- SAP GitHub Enterprise -->
+<div class="slide">
+  <div class="timing">⏱ Session 2 · Git's Role in DevOps</div>
+  <h2 class="green">SAP GitHub Enterprise — github.tools.sap</h2>
+  <div class="cols c2">
+    <div class="card b2 mb">
+      <h3 class="green">What is it?</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">SAP runs its own private GitHub instance at <code>github.tools.sap</code>. Same GitHub you know — same Git, same PRs, same code review — but on SAP's own infrastructure, behind SAP SSO.</p>
+    </div>
+    <div class="card b2 mb">
+      <h3 class="green">Why not just use github.com?</h3>
+      <ul style="margin-top:8px;font-size:0.9rem;">
+        <li>SAP code is proprietary — can't be on public GitHub</li>
+        <li>Compliance — data must stay within SAP systems</li>
+        <li>SSO — log in with your SAP account</li>
+        <li>Access control — only SAP employees can access</li>
+      </ul>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Feature</th><th>github.tools.sap</th><th>github.com</th></tr></thead>
+    <tbody>
+      <tr><td>Authentication</td><td>SAP SSO (your SAP credentials)</td><td>GitHub account</td></tr>
+      <tr><td>Code visibility</td><td>SAP employees only</td><td>Public or private</td></tr>
+      <tr><td>GitHub Actions</td><td>❌ Disabled at enterprise level</td><td>✅ Available</td></tr>
+      <tr><td>Used for</td><td>SAP internal code (your daily work)</td><td>Our training pipeline today</td></tr>
+    </tbody>
+  </table>
+  <div class="note g mt"><strong>Training decision:</strong> Since GitHub Actions is disabled on github.tools.sap, today's CI/CD pipeline runs on github.com/Devops-Training-Batch-1-SAP. Scholars fork from there. For real SAP projects → use Jenkins or SAP CI/CD Service.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SESSION 3 — CI/CD CONCEPTS + PIPELINE
+══════════════════════════════════════════ -->
+<div class="slide sec-3">
+  <div class="badge b-orange mb" style="display:inline-block;font-size:0.9rem;padding:6px 20px;">Session 3 · 25 minutes</div>
+  <h1 style="font-size:3rem;margin-top:16px;" class="orange">CI/CD Concepts + Pipeline Anatomy</h1>
+  <p style="font-size:1.1rem;color:#8b949e;margin-top:12px;">How code gets from your laptop to live production</p>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center;">
+    <span class="badge b-orange">What is CI</span>
+    <span class="badge b-orange">What is CD</span>
+    <span class="badge b-orange">Delivery vs Deployment</span>
+    <span class="badge b-orange">Pipeline Anatomy</span>
+    <span class="badge b-orange">Artifact</span>
+    <span class="badge b-orange">Our Pipeline</span>
+  </div>
+</div>
+
+<!-- What is CI -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · CI/CD Concepts</div>
+  <h2 class="orange">What is Continuous Integration (CI)?</h2>
+  <div class="card b3 mb full" style="padding:20px;">
+    <p style="font-size:1rem;line-height:1.9;"><strong>CI</strong> is the practice of <strong class="orange">automatically building and testing</strong> every code change the moment it's pushed to the shared repository — multiple times per day, every day.</p>
+  </div>
+  <div class="cols c3">
+    <div class="card">
+      <h3 class="orange">The Problem CI Solves</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>5 devs work in isolation 2 weeks</li>
+        <li>All merge at once — "integration hell"</li>
+        <li>Conflicts everywhere</li>
+        <li>Nobody knows what broke what</li>
+        <li>Takes 3 days to untangle</li>
+      </ul>
+    </div>
+    <div class="card b3">
+      <h3 class="orange">What CI Does Instead</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Merge small, merge often</li>
+        <li>Every push → automatic build + test</li>
+        <li>Bug caught in minutes not days</li>
+        <li>Always know the code works</li>
+        <li>Developers stay in sync</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="orange">3 Rules of CI</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Every commit triggers the pipeline</li>
+        <li>Fix broken builds immediately</li>
+        <li>Software works ALL the time</li>
+      </ul>
+      <p style="font-size:0.82rem;color:#8b949e;margin-top:8px;">"Finish First Before Start" — don't pile up uncommitted work</p>
+    </div>
+  </div>
+  <div class="note o mt"><strong>Baking analogy:</strong> Old way = bake the whole cake then find out the batter was wrong. CI = taste the batter before baking, adjust as you go. Catch problems early when they're cheap to fix.</div>
+</div>
+
+<!-- What is CD -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · CI/CD Concepts</div>
+  <h2 class="orange">What is Continuous Delivery vs Deployment (CD)?</h2>
+  <div class="cols c2">
+    <div class="card b3">
+      <h3 class="orange">Continuous Delivery</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Code is <strong>always ready to deploy</strong> — but a human decides when to actually ship.</p>
+      <ul style="margin-top:10px;font-size:0.88rem;">
+        <li>Pipeline runs automatically</li>
+        <li>Builds, tests, stages the release</li>
+        <li>Waits for human approval button</li>
+        <li>Human clicks "Deploy to Production"</li>
+      </ul>
+      <p style="margin-top:10px;font-size:0.85rem;color:#8b949e;">Used in: banking, healthcare, regulated industries</p>
+    </div>
+    <div class="card b2">
+      <h3 class="green">Continuous Deployment</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">Code is <strong>automatically deployed</strong> to production the moment CI passes — no human in the loop.</p>
+      <ul style="margin-top:10px;font-size:0.88rem;">
+        <li>Pipeline runs automatically</li>
+        <li>Builds, tests, deploys</li>
+        <li>No approval button</li>
+        <li>Live in production immediately</li>
+      </ul>
+      <p style="margin-top:10px;font-size:0.85rem;color:#8b949e;">Used in: Netflix, Spotify, SaaS products</p>
+    </div>
+  </div>
+  <div class="card mt full">
+    <table>
+      <thead><tr><th>Term</th><th>Human Approval?</th><th>When to use</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><strong class="orange">Continuous Integration</strong></td><td>No</td><td>Always</td><td>Every push runs tests</td></tr>
+        <tr><td><strong class="orange">Continuous Delivery</strong></td><td>Yes — human clicks</td><td>Regulated industries</td><td>Bank releases every Friday</td></tr>
+        <tr><td><strong class="green">Continuous Deployment</strong></td><td>No — fully automatic</td><td>Fast-moving products</td><td>Netflix deploys 100x/day</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Why CI/CD Exists -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · CI/CD Concepts</div>
+  <h2 class="orange">Why Does CI/CD Exist?</h2>
+  <div class="cols c2">
+    <div>
+      <div class="card red mb">
+        <h3 class="red">Without CI/CD</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>Releases once a month</li>
+          <li>Deploy on Friday night — fix all weekend</li>
+          <li>Manual testing takes weeks</li>
+          <li>Deployment steps documented in a 50-page runbook</li>
+          <li>One person knows how to deploy — what if they're on holiday?</li>
+          <li>Rollback means restoring from backup — hours</li>
+        </ul>
+      </div>
+      <div class="note o">
+        <strong>True story:</strong> A bank released once every quarter. 3 months of changes, deployed on a Saturday. Deployment took 8 hours. Every release was an emergency. The team called it "the most stressful day of the year." Every quarter.
+      </div>
+    </div>
+    <div>
+      <div class="card b3 mb">
+        <h3 class="orange">With CI/CD</h3>
+        <ul style="margin-top:8px;font-size:0.9rem;">
+          <li>Deploy multiple times per day</li>
+          <li>Deploy on Tuesday morning — boring</li>
+          <li>Tests run in 3 minutes, automatically</li>
+          <li>Deploy = <code>git push</code></li>
+          <li>Any developer can deploy — it's just a push</li>
+          <li>Rollback = redeploy previous artifact — 2 minutes</li>
+        </ul>
+      </div>
+      <div class="cols c2">
+        <div class="card center" style="padding:14px;">
+          <h3 style="font-size:1.4rem;" class="orange">200x</h3>
+          <p style="font-size:0.8rem;">more frequent deploys</p>
+        </div>
+        <div class="card center" style="padding:14px;">
+          <h3 style="font-size:1.4rem;" class="green">24x</h3>
+          <p style="font-size:0.8rem;">faster recovery</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pipeline Anatomy -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · Pipeline Anatomy</div>
+  <h2 class="orange">Anatomy of a CI/CD Pipeline</h2>
+  <p style="margin-bottom:14px;font-size:0.95rem;color:#8b949e;">A pipeline is a sequence of automated stages. Each stage is a gate — fail one, stop everything.</p>
+  <div class="pipe mb">
+    <div class="pipe-box" style="border-color:#bc8cff;"><strong class="purple">Trigger</strong><br/><span class="small">git push</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s2);"><strong class="green">Test</strong><br/><span class="small">mvn test</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s1);"><strong class="blue">Build</strong><br/><span class="small">mvn package</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s3);"><strong class="orange">Artifact</strong><br/><span class="small">app.jar stored</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:#3fb950;"><strong class="green">Deploy</strong><br/><span class="small">cf push</span></div>
+  </div>
+  <div class="cols c3">
+    <div class="card">
+      <h3 class="purple">Trigger</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">What starts the pipeline. A push to main, a PR, a scheduled time, a manual button. In our pipeline: <code>on: [push, pull_request]</code></p>
+    </div>
+    <div class="card b2">
+      <h3 class="green">Test → Build</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">Test first — if tests fail, no point building. Build creates the artifact. These are the CI stages. Always run on every push.</p>
+    </div>
+    <div class="card b3">
+      <h3 class="orange">Artifact → Deploy</h3>
+      <p style="font-size:0.88rem;margin-top:6px;">Artifact is the output — a JAR, a Docker image. Deploy pushes it to the environment. These are the CD stages. Only run on merge to main.</p>
+    </div>
+  </div>
+  <p class="note o mt"><strong>Key concept:</strong> Stages run in order. Stage 2 can't start until Stage 1 passes. This is the <code>needs:</code> keyword in GitHub Actions YAML. If Test fails → Build never runs → Deploy never runs → users never see broken code.</p>
+</div>
+
+<!-- What is an Artifact -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · Pipeline Anatomy</div>
+  <h2 class="orange">What is an Artifact?</h2>
+  <div class="cols c2">
+    <div class="card b3 mb">
+      <h3 class="orange">Definition</h3>
+      <p style="font-size:0.9rem;margin-top:8px;">An artifact is the <strong>built output of your code</strong> — the deployable package that contains everything needed to run your application.</p>
+      <ul style="margin-top:10px;font-size:0.9rem;">
+        <li>Java app → <code>.jar</code> file</li>
+        <li>Java web app → <code>.war</code> file</li>
+        <li>Node app → <code>node_modules/</code> + code</li>
+        <li>Any app → Docker image</li>
+        <li>Android app → <code>.apk</code> file</li>
+      </ul>
+    </div>
+    <div class="card b3">
+      <h3 class="orange">Our Artifact Today</h3>
+      <pre><code>mvn package
+  ↓
+app/target/devops-demo-app-1.0.0.jar
+
+This JAR contains:
+  - Compiled Java classes
+  - Spring Boot runtime
+  - All dependencies
+  - Configuration files
+
+Size: ~20 MB
+Deployable: anywhere with Java 17</code></pre>
+    </div>
+  </div>
+  <div class="cols c3 mt">
+    <div class="card center" style="padding:14px;">
+      <h3 class="orange">Build once</h3>
+      <p style="font-size:0.85rem;margin-top:6px;">Same artifact deployed to Dev, QA, Production. Not rebuilt for each environment.</p>
+    </div>
+    <div class="card center" style="padding:14px;">
+      <h3 class="orange">Store it</h3>
+      <p style="font-size:0.85rem;margin-top:6px;">GitHub Actions uploads as artifact. JFrog/Nexus in enterprise. Always keep previous version for rollback.</p>
+    </div>
+    <div class="card center" style="padding:14px;">
+      <h3 class="orange">Version it</h3>
+      <p style="font-size:0.85rem;margin-top:6px;"><code>1.0.0</code>, <code>1.0.1</code>, <code>1.1.0</code> — know exactly what's deployed where at any time.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Our Actual Pipeline -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · Our Pipeline</div>
+  <h2 class="orange">Our Pipeline — devops-demo-app</h2>
+  <p style="margin-bottom:12px;font-size:0.9rem;color:#8b949e;">This is the actual pipeline running at github.com/Devops-Training-Batch-1-SAP/devops-demo-app</p>
+  <div class="pipe mb">
+    <div class="pipe-box" style="border-color:#bc8cff;font-size:0.8rem;"><strong class="purple">push to main</strong><br/>triggers pipeline</div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s2);font-size:0.8rem;"><strong class="green">[test]</strong><br/>mvn test<br/>JUnit results</div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s1);font-size:0.8rem;"><strong class="blue">[build]</strong><br/>mvn package<br/>JAR uploaded</div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s3);font-size:0.8rem;"><strong class="orange">[deploy]</strong><br/>cf push<br/>BTP CF AP21</div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:#3fb950;font-size:0.8rem;"><strong class="green">App LIVE</strong><br/>https://...cf.app</div>
+  </div>
+  <div class="cols c3">
+    <div class="card">
+      <h3 class="green">Job: test</h3>
+      <ul style="margin-top:6px;font-size:0.85rem;">
+        <li>Runs on every push + PR</li>
+        <li>Ubuntu latest runner</li>
+        <li>Sets up Java 17</li>
+        <li><code>mvn test</code> in /app folder</li>
+        <li>Fail = pipeline stops here</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="blue">Job: build</h3>
+      <ul style="margin-top:6px;font-size:0.85rem;">
+        <li><code>needs: test</code></li>
+        <li><code>mvn package -DskipTests</code></li>
+        <li>Uploads JAR as GitHub artifact</li>
+        <li>Available for download 90 days</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="orange">Job: deploy</h3>
+      <ul style="margin-top:6px;font-size:0.85rem;">
+        <li><code>needs: build</code></li>
+        <li>Only on push to main</li>
+        <li>Downloads JAR from build job</li>
+        <li>Installs CF CLI</li>
+        <li>Authenticates via refresh token</li>
+        <li><code>cf push -f manifest.yml</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Environments -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · Pipeline Anatomy</div>
+  <h2 class="orange">Environments — Dev → QA → Production</h2>
+  <div class="cols c3">
+    <div class="card">
+      <h3 class="blue">🛠️ Development (Dev)</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Developer's own machine or shared dev server</li>
+        <li>Uses fake/seed data</li>
+        <li>Break things freely — no real users here</li>
+        <li>Deploys on every push to feature branch</li>
+        <li>Rapid iteration</li>
+      </ul>
+    </div>
+    <div class="card b3">
+      <h3 class="orange">🧪 QA / Staging</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Mirror of production</li>
+        <li>Same config, same infra, copy of prod data</li>
+        <li>QA team does manual + automated testing</li>
+        <li>Performance tests run here</li>
+        <li>If this breaks, don't promote to prod</li>
+      </ul>
+    </div>
+    <div class="card b2">
+      <h3 class="green">🚀 Production (Prod)</h3>
+      <ul style="margin-top:8px;font-size:0.88rem;">
+        <li>Real users, real money, real data</li>
+        <li>Deployed only after QA passes</li>
+        <li>Monitored 24/7</li>
+        <li>On-call team watches it</li>
+        <li>Every second of downtime costs money</li>
+      </ul>
+    </div>
+  </div>
+  <div class="pipe mt">
+    <div class="pipe-box" style="border-color:var(--s1);">Feature Branch push<br/><span class="small">→ Dev deploy</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s3);">PR opened<br/><span class="small">CI runs → QA</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:#bc8cff;">PR approved<br/><span class="small">merge to main</span></div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-box" style="border-color:var(--s2);">Main push<br/><span class="small">→ Production</span></div>
+  </div>
+  <p class="note o mt"><strong>Today:</strong> We have one environment — BTP CF. In a production SAP project you'd have CF Dev space, CF QA space, and CF Production space — all automated.</p>
+</div>
+
+<!-- Pipeline YAML walkthrough -->
+<div class="slide">
+  <div class="timing">⏱ Session 3 · Pipeline Anatomy</div>
+  <h2 class="orange">Pipeline YAML — The 4 Key Sections</h2>
+  <div class="cols c2">
+    <pre style="font-size:0.78rem;"><code><span class="cmt"># 1. TRIGGER — what fires the pipeline</span>
+<span class="kw">on</span>:
+  <span class="kw">push</span>:
+    branches: [main]
+  <span class="kw">pull_request</span>:
+    branches: [main]
+
+<span class="cmt"># 2. JOB — a group of steps</span>
+<span class="kw">jobs</span>:
+  <span class="fn">test</span>:
+    runs-on: ubuntu-latest  <span class="cmt"># fresh Linux machine</span>
+
+  <span class="fn">build</span>:
+    needs: test             <span class="cmt"># waits for test to pass</span>
+
+  <span class="fn">deploy</span>:
+    needs: build            <span class="cmt"># waits for build to pass</span>
+    <span class="kw">if</span>: github.ref == 'refs/heads/main'</code></pre>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card b3">
+        <h3 class="orange">1. Trigger (<code>on:</code>)</h3>
+        <p style="font-size:0.88rem;margin-top:6px;">Defines what event fires the pipeline. Push to main AND pull requests both trigger test + build. Only push to main triggers deploy.</p>
+      </div>
+      <div class="card b3">
+        <h3 class="orange">2. Jobs + <code>needs:</code></h3>
+        <p style="font-size:0.88rem;margin-top:6px;"><code>needs:</code> creates a dependency chain. Test must pass before build starts. Build must pass before deploy starts. Sequential gates.</p>
+      </div>
+      <div class="card b3">
+        <h3 class="orange">3. Steps inside a job</h3>
+        <p style="font-size:0.88rem;margin-top:6px;">Each step is one action. <code>uses:</code> = use a pre-built action. <code>run:</code> = run a shell command. Steps run in order within a job.</p>
+      </div>
+      <div class="card b3">
+        <h3 class="orange">4. Secrets (<code>$&#123;&#123; secrets.X &#125;&#125;</code>)</h3>
+        <p style="font-size:0.88rem;margin-top:6px;">Credentials stored encrypted in GitHub repo settings. Referenced by name in YAML. Never visible in logs or code.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Final Summary -->
+<div class="slide">
+  <div class="timing">⏱ Full Summary</div>
+  <h2 style="color:#bc8cff;">The Story So Far</h2>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+    <div class="step">
+      <div class="step-num" style="background:var(--s1);">1</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="blue">DevOps</strong> = culture of collaboration + automation. Dev and Ops as one team. The ∞ loop: Plan → Code → Build → Test → Release → Deploy → Operate → Monitor.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--s2);">2</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="green">Git</strong> = the foundation. Everything starts with a push. PRs trigger pipelines. Feature branches keep main stable. GitOps = infrastructure declared in Git.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--s3);">3</div>
+      <div class="card full" style="padding:12px 16px;">
+        <strong class="orange">CI/CD Pipeline</strong> = automated conveyor belt. Trigger → Test → Build → Artifact → Deploy. CI = build + test on every push. CD = deploy after CI passes.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:#bc8cff;">4</div>
+      <div class="card full b1" style="padding:12px 16px;">
+        <strong class="blue">Next:</strong> Hands-on — fork the repo, set up secrets, push a code change, watch the full pipeline run, verify your app is live on BTP CF.
+      </div>
+    </div>
+  </div>
+  <div class="note mt"><strong>Ask the scholars:</strong> "In one sentence — what is the journey from git push to live app?" Let them answer. That's the test of understanding.</div>
+</div>
+
+</div><!-- end deck -->
+
+<div id="progress"></div>
+<div class="slide-label" id="slide-label"></div>
+<div id="nav">
+  <button onclick="go(-1)">← Prev</button>
+  <span id="counter"></span>
+  <button onclick="go(1)">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  const sectionColors = {
+    0: '#bc8cff', 1: '#bc8cff', 2: '#58a6ff',
+    3: '#58a6ff', 4: '#58a6ff', 5: '#58a6ff', 6: '#58a6ff',
+    7: '#58a6ff', 8: '#58a6ff', 9: '#58a6ff',
+    10: '#3fb950', 11: '#3fb950', 12: '#3fb950',
+    13: '#3fb950', 14: '#3fb950', 15: '#3fb950',
+    16: '#f0883e', 17: '#f0883e', 18: '#f0883e',
+    19: '#f0883e', 20: '#f0883e', 21: '#f0883e',
+    22: '#f0883e', 23: '#bc8cff'
+  };
+
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('slide-label').textContent = `${current + 1} / ${slides.length}`;
+    const pct = ((current + 1) / slides.length) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+    const col = sectionColors[current] || '#58a6ff';
+    document.getElementById('progress').style.background = col;
+  }
+
+  function go(dir) { show(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  show(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jenkins CI/CD — SAP DevOps Training</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .deck { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 50px 80px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .slide.active { display: flex; opacity: 1; }
+
+    h1 { font-size: 3rem; font-weight: 700; line-height: 1.15; }
+    h2 { font-size: 1.9rem; font-weight: 700; margin-bottom: 28px; color: #e74c3c; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    p, li { font-size: 1rem; line-height: 1.75; color: #c9d1d9; }
+    ul { list-style: none; }
+    ul li::before { content: "▸ "; color: #e74c3c; }
+
+    .red    { color: #e74c3c; }
+    .green  { color: #3fb950; }
+    .blue   { color: #58a6ff; }
+    .orange { color: #f0883e; }
+    .yellow { color: #d29922; }
+    .gray   { color: #8b949e; }
+
+    .cols { display: grid; gap: 24px; width: 100%; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 22px 26px;
+    }
+    .card.red-b   { border-color: #e74c3c; }
+    .card.green-b { border-color: #3fb950; }
+    .card.blue-b  { border-color: #58a6ff; }
+
+    pre {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      width: 100%;
+    }
+    .kw   { color: #ff7b72; }
+    .str  { color: #a5d6ff; }
+    .cmt  { color: #8b949e; font-style: italic; }
+    .cmd  { color: #3fb950; }
+    .fn   { color: #d2a8ff; }
+    .flag { color: #f0883e; }
+    .num  { color: #f0883e; }
+
+    .diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .dbox {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px 18px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .dbox.red-b   { border-color: #e74c3c; }
+    .dbox.green-b { border-color: #3fb950; }
+    .dbox.blue-b  { border-color: #58a6ff; }
+    .arrow { font-size: 1.4rem; color: #8b949e; margin: 0 8px; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-red    { background: #2d1010; color: #e74c3c; border: 1px solid #e74c3c; }
+    .badge-green  { background: #0d2818; color: #3fb950; border: 1px solid #3fb950; }
+    .badge-blue   { background: #0d1f38; color: #58a6ff; border: 1px solid #58a6ff; }
+    .badge-orange { background: #2d1e0a; color: #f0883e; border: 1px solid #f0883e; }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .step-num {
+      min-width: 34px;
+      height: 34px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th { background: #21262d; padding: 10px 14px; text-align: left; color: #e74c3c; font-weight: 600; border-bottom: 1px solid #30363d; }
+    td { padding: 10px 14px; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+    tr:last-child td { border-bottom: none; }
+
+    .note {
+      border-left: 3px solid #e74c3c;
+      background: #1a1010;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: #c9d1d9;
+      width: 100%;
+    }
+    .success-box {
+      border-left: 3px solid #3fb950;
+      background: #0d1a10;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: #c9d1d9;
+      width: 100%;
+    }
+
+    .slide-title { background: radial-gradient(ellipse at 60% 40%, #3a0a0a 0%, #0d1117 70%); }
+    .slide-title .sub { font-size: 1.1rem; color: #8b949e; margin-top: 12px; }
+
+    #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: #e74c3c; transition: width 0.3s ease; z-index: 10; }
+    #nav { position: fixed; bottom: 20px; right: 24px; display: flex; align-items: center; gap: 12px; z-index: 10; }
+    #nav button { background: #21262d; border: 1px solid #30363d; color: #e6edf3; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
+    #nav button:hover { background: #30363d; }
+    #counter { color: #8b949e; font-size: 0.85rem; min-width: 60px; text-align: center; }
+    .slide-label { position: fixed; top: 20px; right: 24px; color: #30363d; font-size: 0.8rem; z-index: 10; }
+
+    .full { width: 100%; }
+    .mt { margin-top: 16px; }
+    .mb { margin-bottom: 12px; }
+    .center { text-align: center; }
+    .small { font-size: 0.85rem; color: #8b949e; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #21262d; padding: 1px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1. Title -->
+  <div class="slide slide-title active">
+    <div style="font-size:4.5rem; margin-bottom:16px;">🔧</div>
+    <h1>Jenkins CI/CD</h1>
+    <p class="sub">From zero to automated pipelines — hands-on guide</p>
+    <p class="sub mt" style="color:#e74c3c;">SAP DevOps Training · August 2026</p>
+    <p class="sub mt">Press → to begin</p>
+  </div>
+
+  <!-- 2. The Problem Without CI/CD -->
+  <div class="slide">
+    <h2>The Problem Without CI/CD</h2>
+    <div class="card red-b mb full">
+      <p>Imagine 5 developers working on the same codebase. Each writes code for a week, then they try to merge. Conflicts everywhere. Tests fail. Nobody knows whose code broke what.</p>
+      <p style="margin-top:8px;">This is called <span class="red"><strong>integration hell.</strong></span></p>
+    </div>
+    <div class="cols cols-2">
+      <div class="card">
+        <h3 class="red">😤 Without CI/CD</h3>
+        <ul style="margin-top:8px;">
+          <li>Someone manually runs tests</li>
+          <li>Takes hours — or gets forgotten</li>
+          <li>Bug found days later</li>
+          <li>Already reached production</li>
+        </ul>
+      </div>
+      <div class="card green-b">
+        <h3 class="green">✅ With CI/CD</h3>
+        <ul style="margin-top:8px;">
+          <li>Every push triggers tests automatically</li>
+          <li>Bug found in minutes</li>
+          <li>Never reaches production</li>
+          <li>Developer notified immediately</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CI vs CD -->
+  <div class="slide">
+    <h2>CI vs CD — What's the Difference?</h2>
+    <div class="cols cols-2">
+      <div class="card red-b">
+        <h3 class="red">CI — Continuous Integration</h3>
+        <p style="margin:10px 0 8px;">Every time code is pushed to GitHub, automatically:</p>
+        <ul>
+          <li>Pull the latest code</li>
+          <li>Build the application</li>
+          <li>Run all tests</li>
+          <li>Report Pass or Fail immediately</li>
+        </ul>
+        <p style="margin-top:12px;"><span class="badge badge-red">Goal</span> Catch bugs early — within minutes of pushing, not days later.</p>
+      </div>
+      <div class="card green-b">
+        <h3 class="green">CD — Continuous Delivery/Deployment</h3>
+        <p style="margin:10px 0 8px;">After CI passes, automatically:</p>
+        <ul>
+          <li>Package the application</li>
+          <li>Deploy to staging or production</li>
+          <li>Run smoke tests</li>
+          <li>Notify the team</li>
+        </ul>
+        <p style="margin-top:12px;"><span class="badge badge-green">Goal</span> Ship code to users faster with less manual effort.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Full CI/CD Flow -->
+  <div class="slide">
+    <h2>The Full CI/CD Flow</h2>
+    <div class="diagram" style="flex-direction:column; gap:8px; align-items:center;">
+      <div class="dbox blue-b">Developer pushes code to GitHub</div>
+      <div class="arrow" style="margin:0;">↓</div>
+      <div class="dbox red-b" style="padding:16px 32px;">
+        <span class="badge badge-red" style="margin-bottom:8px;">CI</span><br/>
+        Checkout → Build → Test
+      </div>
+      <div style="display:flex; gap:32px; align-items:flex-start; margin-top:4px;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <div class="arrow" style="margin:0;">↓ PASS</div>
+          <div class="dbox green-b" style="padding:16px 28px;">
+            <span class="badge badge-green" style="margin-bottom:8px;">CD</span><br/>
+            Deploy to Staging<br/>→ Deploy to Production<br/>→ Users get the update
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <div class="arrow" style="margin:0;">↓ FAIL</div>
+          <div class="dbox red-b" style="padding:16px 28px;">
+            Build = <span class="red">RED</span><br/>Deploy skipped<br/>Developer notified
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note mt">In this lab we focus on CI — automated build and test. The Deploy stage is a placeholder for where CD would run in a real project.</p>
+  </div>
+
+  <!-- 5. What is Jenkins -->
+  <div class="slide">
+    <h2>What is Jenkins?</h2>
+    <div class="card red-b mb full">
+      <p>Jenkins is an open-source automation server. It watches your Git repository and automatically runs your pipeline whenever code changes are pushed.</p>
+      <p style="margin-top:8px;">Think of Jenkins as a <strong class="red">robot developer that never sleeps</strong> — it pulls your code, runs your tests, and tells you immediately if something broke.</p>
+    </div>
+    <div class="cols cols-2">
+      <div class="card" style="border-color:#f85149;">
+        <h3 style="color:#f85149;">😤 Without Jenkins</h3>
+        <ul style="margin-top:8px;">
+          <li>Developer pushes code</li>
+          <li>Someone manually runs tests</li>
+          <li>Takes hours / forgotten</li>
+          <li>Bug found days later</li>
+        </ul>
+      </div>
+      <div class="card green-b">
+        <h3 class="green">✅ With Jenkins</h3>
+        <ul style="margin-top:8px;">
+          <li>Developer pushes code</li>
+          <li>Jenkins detects the push</li>
+          <li>Runs tests in seconds</li>
+          <li>Bug found immediately</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Jenkins vs GitHub Actions -->
+  <div class="slide">
+    <h2>Jenkins vs GitHub Actions</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>Jenkins</th><th>GitHub Actions</th></tr></thead>
+      <tbody>
+        <tr><td>Hosted</td><td>Self-hosted (your server)</td><td>Cloud (GitHub's servers)</td></tr>
+        <tr><td>Config file</td><td><code>Jenkinsfile</code></td><td><code>.github/workflows/yaml</code></td></tr>
+        <tr><td>UI</td><td>Rich browser dashboard</td><td>GitHub web UI</td></tr>
+        <tr><td>License</td><td>Free, open source</td><td>Free for public repos</td></tr>
+        <tr><td>Used by</td><td>Large enterprises</td><td>Modern open source projects</td></tr>
+      </tbody>
+    </table>
+    <p class="note mt"><strong>Both do the same job</strong> — automate build, test, deploy. The difference is where they run and how they're configured. In this training we use Jenkins for the CI/CD engine and GitHub Actions for the BTP CF pipeline.</p>
+  </div>
+
+  <!-- 7. Jenkins vs GitHub Actions -->
+  <div class="slide">
+    <h2>Jenkins Cons → Fixed by GitHub Actions</h2>
+    <table class="full">
+      <thead>
+        <tr><th>Jenkins Con</th><th>GitHub Actions Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Needs a dedicated server — you install, maintain, pay for it</td>
+          <td><span class="green">Serverless</span> — GitHub runs it on their infrastructure</td>
+        </tr>
+        <tr>
+          <td>Hours of setup — Java, plugins, credentials, jobs</td>
+          <td><span class="green">5 minutes</span> — one YAML file in your repo</td>
+        </tr>
+        <tr>
+          <td>Plugin conflicts — 1800+ plugins that break each other</td>
+          <td><span class="green">No plugins</span> — just versioned Actions from marketplace</td>
+        </tr>
+        <tr>
+          <td>Pipeline config lives in Jenkins UI — server crash = config gone</td>
+          <td><span class="green">Pipeline is a file in repo</span> — version controlled, PR reviewed</td>
+        </tr>
+        <tr>
+          <td>Complex GitHub integration — plugins, webhooks, SSH keys</td>
+          <td><span class="green">Native</span> — GitHub Actions IS GitHub, zero config</td>
+        </tr>
+        <tr>
+          <td>Manual scaling — add agents, configure master-agent setup</td>
+          <td><span class="green">Auto-scales</span> — GitHub handles 1 or 1000 pipelines</td>
+        </tr>
+        <tr>
+          <td>Outdated UI — Blue Ocean deprecated in 2022</td>
+          <td><span class="green">Modern GitHub UI</span> — same place as PRs and commits</td>
+        </tr>
+        <tr>
+          <td>You maintain all infrastructure — updates, backups, downtime</td>
+          <td><span class="green">GitHub maintains it</span> — zero ops overhead</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note mt"><strong>Then why does Jenkins still exist?</strong> Self-hosted servers, air-gapped environments, regulated industries, not on GitHub. In SAP — GitHub Actions is disabled on github.tools.sap at enterprise level, so Jenkins or SAP CI/CD Service is used instead.</p>
+  </div>
+
+  <!-- 7. Core Concepts -->
+  <div class="slide">
+    <h2>Core Concepts</h2>
+    <div class="cols cols-3">
+      <div class="card">
+        <h3 class="red">Job / Project</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">A configured task in Jenkins. You define WHAT to do. Jenkins does it when triggered.</p>
+        <p style="margin-top:8px;"><span class="badge badge-blue">Freestyle</span> <span class="badge badge-orange">Pipeline</span></p>
+      </div>
+      <div class="card">
+        <h3 class="red">Build</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">One execution of a job. Builds are numbered #1, #2, #3...</p>
+        <p style="margin-top:8px;"><span class="badge badge-green">GREEN = SUCCESS</span></p>
+        <p style="margin-top:6px;"><span class="badge badge-red">RED = FAILURE</span></p>
+      </div>
+      <div class="card">
+        <h3 class="red">Pipeline</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">A sequence of stages that run in order. If any stage fails, subsequent stages are skipped.</p>
+        <p style="margin-top:8px; font-size:0.85rem;" class="gray">Checkout → Build → Test → Deploy</p>
+      </div>
+      <div class="card">
+        <h3 class="red">Stage</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">A named section of the pipeline. Jenkins shows each stage's status separately in the UI.</p>
+      </div>
+      <div class="card">
+        <h3 class="red">Agent</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">The machine that runs the pipeline. <code>agent any</code> = use any available machine.</p>
+      </div>
+      <div class="card">
+        <h3 class="red">Jenkinsfile</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">A text file in your repo that defines the entire pipeline as code. Jenkins reads it automatically.</p>
+        <p style="margin-top:8px;"><span class="badge badge-orange">Pipeline as Code</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Freestyle vs Pipeline -->
+  <div class="slide">
+    <h2>Freestyle Job vs Pipeline Job</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>Freestyle Job</th><th>Pipeline Job</th></tr></thead>
+      <tbody>
+        <tr><td>Configuration</td><td>Clicks in Jenkins UI</td><td>Jenkinsfile in your repo</td></tr>
+        <tr><td>Version control</td><td>No — only in Jenkins</td><td>Yes — tracked with your code</td></tr>
+        <tr><td>Stages</td><td>No stage view</td><td>Visual stage-by-stage view</td></tr>
+        <tr><td>Complexity</td><td>Simple tasks</td><td>Full CI/CD workflows</td></tr>
+        <tr><td>Recommended for</td><td>Quick demos</td><td>Real projects</td></tr>
+      </tbody>
+    </table>
+    <div class="cols cols-2 mt">
+      <div class="note">
+        <strong>SCM Polling:</strong> Jenkins checks GitHub every N minutes for changes. Easy setup — just a cron expression. <code>* * * * *</code> = every minute.
+      </div>
+      <div class="success-box">
+        <strong>Webhook (production standard):</strong> GitHub notifies Jenkins instantly on push. Immediate trigger. Requires public Jenkins URL + GitHub config.
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Prerequisites -->
+  <div class="slide">
+    <h2>Prerequisites — New Laptop Setup</h2>
+    <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3 style="margin-bottom:6px;">Install Jenkins (Mac via Homebrew)</h3>
+          <pre style="margin:0;"><code><span class="cmt"># Install Homebrew if not present</span>
+/bin/bash -c "$(curl -fsSL https://brew.sh/)"
+<span class="cmd">brew install jenkins-lts</span>
+<span class="cmd">brew services start jenkins-lts</span>
+<span class="cmt"># Jenkins runs on http://localhost:8080</span></code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3 style="margin-bottom:6px;">Unlock Jenkins (first time only)</h3>
+          <pre style="margin:0;"><code><span class="cmd">cat ~/.jenkins/secrets/initialAdminPassword</span>
+<span class="cmt"># Open http://localhost:8080 → paste password → Install suggested plugins → create admin user</span></code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3 style="margin-bottom:6px;">Verify Python + clone your repo</h3>
+          <pre style="margin:0;"><code><span class="cmd">python3 --version</span>
+<span class="cmd">git clone https://github.com/YOUR_USERNAME/Jenkins.git</span>
+<span class="cmd">cd Jenkins</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Files Overview -->
+  <div class="slide">
+    <h2>Files Used in This Lab</h2>
+    <div class="card blue-b mb full">
+      <pre style="margin:0; background:transparent; border:none; padding:0;"><code>Jenkins/
+├── <span class="str">calculator.py</span>        ← the application (what we're testing)
+├── <span class="str">test_calculator.py</span>   ← the tests (what Jenkins runs)
+└── <span class="str">Jenkinsfile</span>          ← the pipeline definition (what Jenkins follows)</code></pre>
+    </div>
+    <div class="cols cols-3">
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:8px;">🐍</div>
+        <h3 class="blue">calculator.py</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">The Python application — add, subtract, multiply, divide. In a real project this would be your entire web app.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:8px;">✅</div>
+        <h3 class="green">test_calculator.py</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">Assertions that verify each function returns the correct result. Jenkins runs this in the Test stage.</p>
+      </div>
+      <div class="card center">
+        <div style="font-size:2rem; margin-bottom:8px;">📋</div>
+        <h3 class="red">Jenkinsfile</h3>
+        <p style="font-size:0.9rem; margin-top:6px;">Tells Jenkins exactly what to do. Lives in the repo — pipeline is versioned alongside your code.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. calculator.py -->
+  <div class="slide">
+    <h2>calculator.py — The Application</h2>
+    <pre class="full"><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a + b         <span class="cmt"># correct version</span>
+
+<span class="kw">def</span> <span class="fn">subtract</span>(a, b):
+    <span class="kw">return</span> a - b
+
+<span class="kw">def</span> <span class="fn">multiply</span>(a, b):
+    <span class="kw">return</span> a * b
+
+<span class="kw">def</span> <span class="fn">divide</span>(a, b):
+    <span class="kw">if</span> b == <span class="num">0</span>:
+        <span class="kw">return</span> <span class="kw">None</span>      <span class="cmt"># avoid division by zero</span>
+    <span class="kw">return</span> a / b</code></pre>
+    <p class="note mt"><strong>Why this matters in CI:</strong> When a developer accidentally changes <code>return a + b</code> to <code>return a - b</code>, the tests catch it immediately on the next push. Without CI, this bug might reach production.</p>
+  </div>
+
+  <!-- 12. test_calculator.py -->
+  <div class="slide">
+    <h2>test_calculator.py — The Tests</h2>
+    <pre class="full"><code><span class="kw">import</span> calculator              <span class="cmt"># import the application module</span>
+
+<span class="cmt"># assert &lt;condition&gt; → fails with AssertionError if condition is False</span>
+assert calculator.add(<span class="num">2</span>, <span class="num">3</span>) == <span class="num">5</span>          <span class="cmt"># 2+3 must equal 5</span>
+assert calculator.subtract(<span class="num">5</span>, <span class="num">3</span>) == <span class="num">2</span>     <span class="cmt"># 5-3 must equal 2</span>
+assert calculator.multiply(<span class="num">2</span>, <span class="num">3</span>) == <span class="num">6</span>     <span class="cmt"># 2×3 must equal 6</span>
+assert calculator.divide(<span class="num">6</span>, <span class="num">3</span>) == <span class="num">2</span>       <span class="cmt"># 6÷3 must equal 2</span>
+
+print(<span class="str">"All tests passed"</span>)              <span class="cmt"># only prints if all assertions pass</span></code></pre>
+    <table style="margin-top:16px;">
+      <thead><tr><th>Test</th><th>Input</th><th>Expected</th><th>What it catches</th></tr></thead>
+      <tbody>
+        <tr><td><code>add(2,3)==5</code></td><td>2, 3</td><td>5</td><td>add function returning wrong result</td></tr>
+        <tr><td><code>subtract(5,3)==2</code></td><td>5, 3</td><td>2</td><td>subtraction logic error</td></tr>
+        <tr><td><code>multiply(2,3)==6</code></td><td>2, 3</td><td>6</td><td>multiplication logic error</td></tr>
+        <tr><td><code>divide(6,3)==2</code></td><td>6, 3</td><td>2</td><td>division logic error</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 13. Jenkinsfile -->
+  <div class="slide">
+    <h2>Jenkinsfile — The Pipeline Definition</h2>
+    <pre class="full"><code><span class="fn">pipeline</span> {
+    <span class="kw">agent</span> any          <span class="cmt">// run on any available Jenkins agent</span>
+
+    <span class="kw">stages</span> {
+        <span class="fn">stage</span>(<span class="str">'Checkout'</span>) {
+            <span class="kw">steps</span> {
+                <span class="kw">git</span> branch: <span class="str">'main'</span>, url: <span class="str">'https://github.com/YOUR/repo.git'</span>
+            }    <span class="cmt">// pull latest code from GitHub</span>
+        }
+        <span class="fn">stage</span>(<span class="str">'Build'</span>) {
+            <span class="kw">steps</span> {
+                sh <span class="str">'echo "Build stage running"'</span>
+                sh <span class="str">'python3 --version'</span>   <span class="cmt">// verify environment</span>
+            }
+        }
+        <span class="fn">stage</span>(<span class="str">'Test'</span>) {
+            <span class="kw">steps</span> {
+                sh <span class="str">'python3 test_calculator.py'</span>  <span class="cmt">// FAIL here = Red build, Deploy skipped</span>
+            }
+        }
+        <span class="fn">stage</span>(<span class="str">'Deploy'</span>) {
+            <span class="kw">steps</span> {
+                sh <span class="str">'echo "Deploy stage placeholder"'</span>
+            }   <span class="cmt">// only runs if Test passes</span>
+        }
+    }
+}</code></pre>
+  </div>
+
+  <!-- 14. Jenkinsfile explained -->
+  <div class="slide">
+    <h2>Jenkinsfile — Every Keyword Explained</h2>
+    <table>
+      <thead><tr><th>Instruction</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>pipeline {}</code></td><td>The entire pipeline definition</td></tr>
+        <tr><td><code>agent any</code></td><td>Run on any available Jenkins machine</td></tr>
+        <tr><td><code>stages {}</code></td><td>Container for all stages</td></tr>
+        <tr><td><code>stage('Name') {}</code></td><td>A named step in the pipeline</td></tr>
+        <tr><td><code>steps {}</code></td><td>Commands to run inside a stage</td></tr>
+        <tr><td><code>sh '...'</code></td><td>Run a shell command on the agent</td></tr>
+        <tr><td><code>git branch: 'main', url: '...'</code></td><td>Pull code from GitHub</td></tr>
+      </tbody>
+    </table>
+    <p class="note mt"><strong>Why keep Jenkinsfile in the repo?</strong> If Jenkins server crashes and the config was only in the UI, you lose everything. With Jenkinsfile in the repo, you can recreate the pipeline on a new Jenkins server in minutes.</p>
+  </div>
+
+  <!-- 15. Task 1 - Freestyle -->
+  <div class="slide">
+    <h2>Task 1 — Freestyle Job</h2>
+    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><h3 style="margin-bottom:4px;">Create job</h3>
+          <p style="font-size:0.9rem;">New Item → name: <code>calculator-freestyle</code> → select <strong>Freestyle project</strong> → OK</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><h3 style="margin-bottom:4px;">Configure Source Code Management</h3>
+          <p style="font-size:0.9rem;">Select <strong>Git</strong> → Repository URL: <code>https://github.com/YOUR/Jenkins.git</code> → Branch: <code>*/main</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div><h3 style="margin-bottom:4px;">Add Build Steps → Execute shell</h3>
+          <pre style="margin-top:6px;"><code><span class="cmd">echo</span> <span class="str">"Listing files"</span>
+ls
+<span class="cmd">echo</span> <span class="str">"Python version"</span>
+python3 --version</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div><h3 style="margin-bottom:4px;">Run & verify</h3>
+          <p style="font-size:0.9rem;"><strong>Build Now</strong> → click build #1 → <strong>Console Output</strong> → look for <code>Finished: SUCCESS</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16. Task 2 - Pipeline -->
+  <div class="slide">
+    <h2>Task 2 — Pipeline Job with Jenkinsfile</h2>
+    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><h3 style="margin-bottom:4px;">Push all 3 files to GitHub</h3>
+          <pre style="margin-top:6px;"><code><span class="cmd">git add</span> calculator.py test_calculator.py Jenkinsfile
+<span class="cmd">git commit</span> -m <span class="str">"Add calculator app and Jenkinsfile"</span>
+<span class="cmd">git push</span> origin main</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><h3 style="margin-bottom:4px;">Create Pipeline job</h3>
+          <p style="font-size:0.9rem;">New Item → name: <code>calculator-pipeline</code> → select <strong>Pipeline</strong> → OK</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div><h3 style="margin-bottom:4px;">Configure: Pipeline script from SCM</h3>
+          <p style="font-size:0.9rem;">Pipeline tab → Definition: <strong>Pipeline script from SCM</strong> → SCM: <strong>Git</strong> → URL: your repo → Branch: <code>*/main</code> → Script Path: <code>Jenkinsfile</code> → Save</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div><h3 style="margin-bottom:4px;">Build Now → watch stages run</h3>
+          <p style="font-size:0.9rem;">Checkout → Build → Test → Deploy. Console Output should show: <code>All tests passed</code> → <code>Finished: SUCCESS</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17. Task 3 - Red Build -->
+  <div class="slide">
+    <h2>Task 3 — Trigger a Red Build (Bug)</h2>
+    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><h3 style="margin-bottom:4px;">Enable SCM Polling</h3>
+          <p style="font-size:0.9rem;">calculator-pipeline → Configure → Triggers → check <strong>Poll SCM</strong> → Schedule: <code>* * * * *</code> (every minute) → Save</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><h3 style="margin-bottom:4px;">Introduce a bug in calculator.py</h3>
+          <pre style="margin-top:6px;"><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a - b    <span class="cmt"># BUG: should be a + b</span></code></pre>
+          <pre style="margin-top:6px;"><code><span class="cmd">git add</span> calculator.py
+<span class="cmd">git commit</span> -m <span class="str">"Added fault code"</span>
+<span class="cmd">git push</span> origin main</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="card red-b mt full">
+      <p><strong>Wait up to 1 minute.</strong> Jenkins detects the push, runs the pipeline automatically.</p>
+      <p style="margin-top:8px;"><span class="red">Expected result:</span> Test stage FAILS → <code>AssertionError</code> because <code>add(2,3)</code> returns <code>-1</code> not <code>5</code>. Deploy stage is skipped. Build = <strong class="red">RED ✗</strong></p>
+    </div>
+  </div>
+
+  <!-- 18. Task 3 - Green Build -->
+  <div class="slide">
+    <h2>Task 3 — Fix the Bug → Green Build</h2>
+    <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+      <div class="step">
+        <div class="step-num">3</div>
+        <div><h3 style="margin-bottom:4px;">Fix calculator.py</h3>
+          <pre style="margin-top:6px;"><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a + b    <span class="cmt"># FIXED</span></code></pre>
+          <pre style="margin-top:6px;"><code><span class="cmd">git add</span> calculator.py
+<span class="cmd">git commit</span> -m <span class="str">"Fixed add function"</span>
+<span class="cmd">git push</span> origin main</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="card green-b mt full">
+      <p><strong>Wait up to 1 minute.</strong> Jenkins detects the fix and re-runs the pipeline.</p>
+      <p style="margin-top:8px;"><span class="green">Expected result:</span> All stages pass. Test stage prints "All tests passed". Deploy stage runs. Build = <strong class="green">GREEN ✓</strong></p>
+    </div>
+    <div class="diagram mt" style="gap:6px;">
+      <div class="dbox">Push buggy code</div>
+      <div class="arrow">→</div>
+      <div class="dbox red-b">Test FAILS<br/><span class="red">RED build</span></div>
+      <div class="arrow">→</div>
+      <div class="dbox">Fix & push</div>
+      <div class="arrow">→</div>
+      <div class="dbox green-b">All stages PASS<br/><span class="green">GREEN build</span></div>
+    </div>
+  </div>
+
+  <!-- 19. Quick Reference -->
+  <div class="slide">
+    <h2>Quick Reference — Jenkins Commands</h2>
+    <table class="mb full">
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>brew services start jenkins-lts</code></td><td>Start Jenkins</td></tr>
+        <tr><td><code>brew services stop jenkins-lts</code></td><td>Stop Jenkins</td></tr>
+        <tr><td><code>brew services restart jenkins-lts</code></td><td>Restart Jenkins</td></tr>
+        <tr><td><code>cat ~/.jenkins/secrets/initialAdminPassword</code></td><td>Get initial admin password</td></tr>
+      </tbody>
+    </table>
+    <table class="full">
+      <thead><tr><th>Error</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>python3: not found</code></td><td>Install Python on the Jenkins machine</td></tr>
+        <tr><td><code>No module named 'calculator'</code></td><td>Check filename spelling with <code>ls -la</code></td></tr>
+        <tr><td><code>couldn't find remote ref refs/heads/master</code></td><td>Change Branch Specifier to <code>*/main</code></td></tr>
+        <tr><td>Build doesn't auto-trigger</td><td>Configure → Triggers → Poll SCM → <code>* * * * *</code></td></tr>
+        <tr><td>Port 8080 already in use</td><td>Stop the other service or change Jenkins port</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 20. Key Concepts Summary -->
+  <div class="slide">
+    <h2>Key Concepts Summary</h2>
+    <table class="full">
+      <thead><tr><th>Term</th><th>Simple Definition</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CI</strong></td><td>Auto build + test on every code push</td></tr>
+        <tr><td><strong>CD</strong></td><td>Auto deploy after CI passes</td></tr>
+        <tr><td><strong>Jenkins</strong></td><td>The automation server that runs CI/CD</td></tr>
+        <tr><td><strong>Pipeline</strong></td><td>Sequence of stages: Checkout → Build → Test → Deploy</td></tr>
+        <tr><td><strong>Jenkinsfile</strong></td><td>Text file that defines the pipeline as code</td></tr>
+        <tr><td><strong>Freestyle job</strong></td><td>Simple Jenkins job configured via UI</td></tr>
+        <tr><td><strong>Pipeline job</strong></td><td>Advanced job that reads from Jenkinsfile</td></tr>
+        <tr><td><strong>SCM Polling</strong></td><td>Jenkins checks GitHub for changes on a schedule</td></tr>
+        <tr><td><strong class="red">Red build</strong></td><td>Pipeline failed — a stage returned an error</td></tr>
+        <tr><td><strong class="green">Green build</strong></td><td>All stages passed successfully</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 21. What You Learned -->
+  <div class="slide">
+    <h2>What You Just Did — The Big Picture</h2>
+    <div class="diagram" style="flex-direction:column; gap:8px; align-items:flex-start; width:100%;">
+      <div class="dbox blue-b full" style="width:100%; text-align:left;">1. Wrote a Jenkinsfile → defined pipeline as code</div>
+      <div class="arrow" style="margin:0; align-self:center;">↓</div>
+      <div class="dbox full" style="width:100%; text-align:left;">2. Pushed to GitHub → code + pipeline config in one place</div>
+      <div class="arrow" style="margin:0; align-self:center;">↓</div>
+      <div class="dbox full" style="width:100%; text-align:left;">3. Jenkins pulled the code → ran Checkout → Build → Test → Deploy</div>
+      <div class="arrow" style="margin:0; align-self:center;">↓</div>
+      <div class="dbox red-b full" style="width:100%; text-align:left;">4. Introduced a bug → Jenkins caught it automatically (<span class="red">Red build</span>)</div>
+      <div class="arrow" style="margin:0; align-self:center;">↓</div>
+      <div class="dbox green-b full" style="width:100%; text-align:left;">5. Fixed the bug → Jenkins confirmed the fix (<span class="green">Green build</span>)</div>
+    </div>
+    <div class="card green-b mt full">
+      <p><strong class="green">This is EXACTLY how CI/CD works in real software teams.</strong> Every company using DevOps practices does exactly this. The test file is just as important as the application — without tests, CI has nothing to verify.</p>
+    </div>
+  </div>
+
+</div>
+
+<div id="progress"></div>
+<div class="slide-label" id="slide-label"></div>
+<div id="nav">
+  <button onclick="go(-1)">← Prev</button>
+  <span id="counter"></span>
+  <button onclick="go(1)">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('slide-label').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${((current + 1) / slides.length) * 100}%`;
+  }
+  function go(dir) { show(current + dir); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+  show(0);
+</script>
+</body>
+</html>
